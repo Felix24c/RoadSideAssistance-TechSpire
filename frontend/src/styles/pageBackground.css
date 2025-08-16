@@ -1,0 +1,21 @@
+.page-background {
+  position: relative; /* needed for absolute positioning of ::before */
+  height: 100vh;
+  width: 100%;
+  background-image: url('../assets/images/bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  overflow: hidden;
+  z-index: 0; /* make sure this is below content */
+}
+
+.page-background::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: -1; /* overlay is above the bg but below content */
+  pointer-events: none; /* so clicks pass through */
+}

@@ -1,90 +1,127 @@
-@import './variables.css';
+@import '../styles/variables.css';
 
-.contact-container {
-  margin: 2rem auto;
-  padding: 2rem 1rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--color-black);
-  color: var(--color-light-grey);
-  border-radius: 8px;
-  width: 90vw; /* 90% of viewport width */
-  max-width: 900px;
+/* Reset fix */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
-  margin-bottom: 80px;
+}
+
+/* Container */
+.contact-container {
+  max-width: 1100px;
+  width: 100%;
+  margin: 15px auto;
+  padding: 10px 20px;
+  font-family: var(--font-main);
+  color: var(--color-light-grey);
+  background-color: var(--color-black);
+  border-radius: 8px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* two-column layout */
+  grid-gap: 20px;
+}
+
+/* Header spans both columns */
+.contact-header {
+  grid-column: span 2;
+  text-align: center;
+  margin-bottom: 0.6rem;
 }
 
 .contact-header h1 {
-  font-size: 2.8rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.6rem;
+  margin-bottom: 0.2rem;
   color: var(--color-blue);
+  font-weight: 600;
 }
 
 .contact-header p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.6rem;
   font-weight: 500;
   color: var(--color-light-grey);
 }
 
-.contact-info h2,
-.contact-form-section h2,
-.contact-faq h2,
-.contact-social h2 {
-  margin-bottom: 1rem;
-  color: var(--color-blue);
+/* Contact info */
+.contact-info {
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+
+.contact-info h2 {
+  color: var(--color-red);
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
 }
 
 .contact-info p {
-  font-size: 1.1rem;
-  margin-bottom: 0.6rem;
-  color: var(--color-light-grey);
+  margin-bottom: 0.5rem;
 }
 
-form {
-  width: 100%;
-  max-width: 600px;
-  margin-bottom: 3rem;
+/* Form section */
+.contact-form-section {
+  font-size: 0.85rem;
+  border: 1px solid var(--color-red);
+  border-radius: 5px;
+  padding: 20px;
 }
 
+.contact-form-section h2 {
+  color: var(--color-red);
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.success-msg {
+  color: #00ff99;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+/* Form */
+.contact-form-section form {
+  display: grid;
+  grid-gap: 10px;
+}
 
 .form-group {
-  margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
 }
 
-label {
-  margin-bottom: 0.4rem;
+.form-group label {
+  color: var(--color-blue);
+  font-size: 0.85rem;
+  margin-bottom: 0.2rem;
   font-weight: 600;
-  color: var(--color-light-grey);
 }
 
-input[type="text"],
-input[type="email"],
-textarea {
-  padding: 0.6rem 0.8rem;
-  font-size: 1rem;
-  border: 1px solid var(--color-dark-grey);
-  border-radius: 5px;
-  font-family: inherit;
-  resize: vertical;
+.form-group input,
+.form-group textarea {
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-blue);
   background-color: var(--color-black);
   color: var(--color-light-grey);
-  transition: border-color 0.3s ease, background-color 0.3s ease;
+  resize: vertical;
+  font-family: var(--font-main);
 }
 
-input[type="text"]::placeholder,
-input[type="email"]::placeholder,
-textarea::placeholder {
-  color: var(--color-dark-grey);
+.form-group input {
+  height: 34px;
 }
 
-input[type="text"]:focus,
-input[type="email"]:focus,
-textarea:focus {
-  border-color: var(--color-blue);
+.form-group input:focus,
+.form-group textarea:focus {
   outline: none;
-  background-color: #1a1a3a; /* a subtle dark-blueish tint for focus */
+  border-color: var(--color-light-grey);
+  box-shadow: 0 0 4px var(--color-blue);
 }
 
 .input-error {
@@ -93,50 +130,133 @@ textarea:focus {
 
 .error-msg {
   color: var(--color-red);
-  font-size: 0.9rem;
-  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  margin-top: 2px;
 }
 
+textarea {
+  min-height: 70px;
+}
+
+/* Submit button */
 .submit-btn {
+  margin-top: 8px;
+  padding: 7px 0;
   background-color: var(--color-blue);
   color: var(--color-light-grey);
-  padding: 0.8rem 1.5rem;
+  font-weight: 700;
   border: none;
   border-radius: 6px;
-  font-size: 1.1rem;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  font-size: 0.9rem;
+  width: 120px;
+  justify-self: start;
 }
 
-.submit-btn:hover {
-  background-color: #2c27a6; /* slightly darker blue */
+.submit-btn:hover,
+.submit-btn:focus {
+  background-color: #0309b099;
+  transform: scale(1.05);
+  outline: none;
 }
 
-.contact-faq .faq-item {
-  margin-bottom: 1.2rem;
+/* FAQ section */
+.contact-faq {
+  font-size: 0.85rem;
 }
 
-.contact-faq h3 {
-  font-size: 1.2rem;
-  margin-bottom: 0.3rem;
+.contact-faq h2 {
+  color: var(--color-red);
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.faq-item {
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.faq-item h3 {
   color: var(--color-blue);
+  font-size: 0.85rem;
+  margin-bottom: 0.15rem;
+  font-weight: 600;
 }
 
-.contact-faq p {
+.faq-item h3:hover {
+  color: var(--color-red);
+}
+
+.faq-item p {
+  font-size: 0.8rem;
   color: var(--color-light-grey);
+  margin-left: 10px;
+  line-height: 1.3;
 }
 
-.contact-social .social-icons {
-  margin-top: 1rem;
+/* Social section - spans both columns */
+.contact-social {
+  grid-column: span 2;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+
+.contact-social h2 {
+  color: var(--color-red);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.9rem;
 }
 
 .social-icons a {
-  font-size: 1.8rem;
+  font-size: 1.1rem;
   color: var(--color-blue);
-  margin-right: 1.5rem;
-  transition: color 0.3s ease;
+  margin: 0 0.4rem;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.social-icons a:hover {
-  color: #2c27a6; /* slightly darker blue */
+.social-icons a:hover,
+.social-icons a:focus {
+  color: var(--color-red);
+  transform: scale(1.05);
+  outline: none;
+}
+
+/* Responsive fallback */
+@media (max-width: 900px) {
+  .contact-container {
+    grid-template-columns: 1fr; /* stack */
+    padding: 12px;
+  }
+
+  .contact-header h1 {
+    font-size: 1.3rem;
+  }
+
+  .contact-header p {
+    font-size: 0.75rem;
+  }
+
+  .contact-info h2,
+  .contact-form-section h2,
+  .contact-faq h2,
+  .contact-social h2 {
+    font-size: 0.9rem;
+  }
+
+  .faq-item h3 {
+    font-size: 0.75rem;
+  }
+
+  .social-icons a {
+    font-size: 1rem;
+  }
+
+  .submit-btn {
+    width: 100%;
+  }
 }

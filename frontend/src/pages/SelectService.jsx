@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/selectservice.css";
+import "../styles/pageBackground.css";
 
 const SelectService = () => {
   const navigate = useNavigate();
@@ -37,30 +38,32 @@ const handleSelect = (service) => {
 };
 
   return (
-    <div className="select-service-container">
-      <h1 className="page-title">Select a Service</h1>
-      <p className="note">
-        Choose the service you need. Payment will be collected in <b>cash</b>{" "}
-        after the service is completed and you are satisfied.
-      </p>
+     <div className="page-background">
+      <div className="select-service-container">
+        <h1 className="page-title">Select a Service</h1>
+        <p className="note">
+          Choose the service you need. Payment will be collected in <b>cash</b>{" "}
+          after the service is completed and you are satisfied.
+        </p>
 
-      {loading && <p>Loading services...</p>}
-      {error && <p className="error">{error}</p>}
+        {loading && <p className="loading">Loading services...</p>}
+        {error && <p className="error">{error}</p>}
 
-      <div className="services-grid">
-        {services.map((service) => (
-          <div className="service-card" key={service.id}>
-            <h2>{service.name}</h2>
-            <p>{service.description}</p>
-            <p className="price">₹{service.price}</p>
-            <button
-              className="select-btn"
-              onClick={() => handleSelect(service)}
-            >
-              Select
-            </button>
-          </div>
-        ))}
+        <div className="services-grid">
+          {services.map((service) => (
+            <div className="service-card" key={service.id}>
+              <h2>{service.name}</h2>
+              <p>{service.description}</p>
+              <p className="price">₹{service.price}</p>
+              <button
+                className="select-btn"
+                onClick={() => handleSelect(service)}
+              >
+                Select
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

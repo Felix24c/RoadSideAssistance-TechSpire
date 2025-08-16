@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/servicerequest.css";
+import "../styles/pageBackground.css";
 
 const ServiceRequest = () => {
   const location = useLocation();
@@ -13,15 +14,30 @@ const ServiceRequest = () => {
   const [success, setSuccess] = useState(null);
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [price, setPrice] = useState(null);
+  const [description, setDescription] = useState(null);
 
+  // ✅ Fetch all services and find the one matching serviceId
   useEffect(() => {
     const backendURL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
-    fetch(`${backendURL}/api/services/${serviceId}`)
+
+    fetch(`${backendURL}/api/services`)
       .then((res) => res.json())
-      .then((data) => setPrice(data.price))
-      .catch((err) => console.error("Failed to fetch price:", err));
+      .then((data) => {
+        const service = data.find((s) => s.id === serviceId);
+        if (service) {
+          setPrice(service.price);
+          setDescription(service.description);
+        } else {
+          setError("Service not found");
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch service details:", err);
+        setError("Failed to fetch service details");
+      });
   }, [serviceId]);
 
+  // ✅ Get user location
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -76,44 +92,55 @@ const ServiceRequest = () => {
   };
 
   return (
-    <div className="service-request-container">
-      <h1>Service Request</h1>
-      <p className="note"><b>Service:</b> {serviceName || "Unknown Service"}</p>
-      {price && (
-        <p className="note price-info">
-          Estimated Price: ₹{price} <span className="price-note">(Pay after service delivery)</span>
-        </p>
-      )}
-      {loadingLocation && <p className="note loading">Fetching your location...</p>}
-      {error && <p className="note error">{error}</p>}
-      {success && <p className="note success">{success}</p>}
+    <div className="page-background">
+      <div className="service-request-container">
+        <h1>Service Request</h1>
+        <p className="note"><b>Service:</b> {serviceName || "Unknown Service"}</p>
 
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Location:</label>
-          <input
-            type="text"
-            name="location"
-            value={formData.location}
-            onChange={handleChange}
-            placeholder="Enter your location"
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Notes (Optional):</label>
-          <textarea
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            placeholder="Any specific instructions?"
-          ></textarea>
-        </div>
-        <div className="form-actions">
-          <button type="button" className="go-back-btn" onClick={() => navigate(-1)}>Go Back</button>
-          <button type="submit" className="submit-btn">Submit Request</button>
-        </div>
-      </form>
+        {/* ✅ Show description + price info */}
+        {description && (
+          <p className="note">
+            <b>Description:</b> {description}
+          </p>
+        )}
+        {price !== null && (
+          <p className="note-price-info">
+            Estimated Price: ₹{price}{" "}
+            <span className="price-note">(Pay after service delivery)</span>
+          </p>
+        )}
+
+        {loadingLocation && <p className="note loading">Fetching your location...</p>}
+        {error && <p className="note error">{error}</p>}
+        {success && <p className="note success">{success}</p>}
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Location:</label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              placeholder="Enter your location"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Notes (Optional):</label>
+            <textarea
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              placeholder="Any specific instructions?"
+            ></textarea>
+          </div>
+          <div className="form-actions">
+            <button type="button" className="go-back-btn" onClick={() => navigate(-1)}>Go Back</button>
+            <button type="submit" className="submit-btn">Submit Request</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

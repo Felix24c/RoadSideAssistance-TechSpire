@@ -1,15 +1,14 @@
-/* src/pages/ServiceRequest.css */
+/* src/styles/servicerequest.css */
 @import "../styles/variables.css";
 
 .service-request-container {
-  max-width: 600px;
+  max-width: 800px;
   margin: 2rem auto;
   padding: 2rem 1.5rem;
   background-color: var(--color-black);
   font-family: var(--font-main);
-  min-height: 80vh;
   color: var(--color-light-grey);
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
 
@@ -18,53 +17,80 @@
   color: var(--color-blue);
   margin-bottom: 1.5rem;
   font-size: 2rem;
+  font-weight: 700;
 }
 
 .note {
   text-align: center;
-  margin-bottom: 1rem;
-  font-size: 1rem;
+  margin-bottom: 0.6rem;
+  font-size: 1.1rem;
+  color: var(--color-light-grey);
+  line-height: 1.4;
 }
 
-.price-info {
+.note-price-info {
   color: var(--color-blue);
-  font-weight: bold;
-  font-size: 1.1rem;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: center; /* ✅ center align for price display */
 }
 
 .price-note {
-  font-weight: normal;
-  font-size: 0.9rem;
+  font-weight: 400;
+  font-size: 0.85rem;
   color: var(--color-light-grey);
 }
 
-.loading { color: var(--color-blue); }
-.error { color: var(--color-red); font-weight: bold; }
-.success { color: #00ff99; font-weight: bold; }
+.loading {
+  color: var(--color-blue);
+  padding: 4px 0;
+  text-align: center;
+}
 
+.error {
+  color: var(--color-red);
+  font-weight: bold;
+  padding: 4px 0;
+  text-align: center;
+}
+
+.success {
+  color: #00ff99;
+  font-weight: bold;
+  padding: 4px 0;
+  text-align: center;
+}
+
+/* Form layout */
 form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1rem 1.2rem;
   margin-top: 1rem;
+  margin: 10px auto;
+}
+
+.form-group {
+  display: contents;
 }
 
 .form-group label {
   color: var(--color-blue);
-  margin-bottom: 0.5rem;
   font-weight: 600;
-  display: block;
+  font-size: 0.95rem;
+  align-self: center;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 0.8rem;
-  border-radius: 8px;
+  padding: 0.55rem 0.8rem;
+  border-radius: 6px;
   border: 1px solid var(--color-blue);
   background-color: var(--color-black);
   color: var(--color-white);
-  font-size: 1rem;
+  font-size: 0.95rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -72,31 +98,32 @@ form {
 .form-group textarea:focus {
   outline: none;
   border-color: var(--color-light-grey);
-  box-shadow: 0 0 5px var(--color-blue);
-  background-color: var(--color-black);
+  box-shadow: 0 0 6px var(--color-blue);
 }
 
 .form-group textarea {
   resize: vertical;
-  min-height: 100px;
+  min-height: 90px;
+  grid-column: span 1;
 }
 
 .form-actions {
+  grid-column: span 2;
   display: flex;
   justify-content: space-between;
-  align-items: center;
   gap: 1rem;
-  flex-wrap: wrap;
+  margin-top: 1rem;
 }
 
 .submit-btn,
 .go-back-btn {
   flex: 1;
-  padding: 0.8rem 1rem;
+  padding: 0.65rem 0.8rem;
   font-weight: bold;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 0.95rem;
   transition: all 0.2s ease;
 }
 
@@ -107,7 +134,7 @@ form {
 
 .submit-btn:hover {
   background-color: #0309b099;
-  transform: scale(1.02);
+  transform: scale(1.03);
 }
 
 .submit-btn:active {
@@ -122,7 +149,7 @@ form {
 
 .go-back-btn:hover {
   background-color: #b30000;
-  transform: scale(1.02);
+  transform: scale(1.03);
 }
 
 .go-back-btn:active {
@@ -131,8 +158,14 @@ form {
 }
 
 /* Responsive adjustments */
-@media (max-width: 480px) {
+@media (max-width: 640px) {
+  form {
+    grid-template-columns: 1fr;
+  }
   .form-actions {
     flex-direction: column;
+  }
+  .form-actions button {
+    width: 100%;
   }
 }

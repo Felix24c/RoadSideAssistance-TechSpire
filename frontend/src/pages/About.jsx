@@ -35,6 +35,11 @@ const About = () => {
             <p>Your trusted partner for quick and reliable roadside assistance.</p>
           </header>
 
+            {/* TechSpire */}
+          <section className="about-techspire">
+            <h2>Developed by Team TechSpire</h2>
+          </section>
+
           {/* Mission */}
           <section className="about-mission">
             <h2>Our Mission</h2>
@@ -62,6 +67,8 @@ const About = () => {
               </div>
             ))}
           </section>
+          
+         
 
           {/* Social Links */}
           <section className="about-social">
@@ -73,6 +80,8 @@ const About = () => {
               <a href="https://linkedin.com/company/QuickAssist" target="_blank" rel="noopener noreferrer"><FaLinkedinIn /></a>
             </div>
           </section>
+
+         
 
         </div>
       </section>

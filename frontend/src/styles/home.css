@@ -1,53 +1,91 @@
-@import './variables.css';
+/* src/styles/home.css */
+@import '../styles/variables.css';
+@import '../styles/pageBackground.css';
 
+/* Full-screen hero content centered over the page background */
 .hero {
-  height: 100vh;
+  min-height: 100vh;                 /* fill the viewport */
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  position: relative;                /* keep it above ::before overlay */
+  padding: 2rem 1rem;
+  z-index: 1;                        /* ensure above .page-background::before */
 }
 
 .hero-overlay {
   width: 100%;
-  height: 100%;
+  max-width: 800px;
   display: flex;
   align-items: center;
   justify-content: center;
+  /* transparent so the page background shows through */
 }
 
 .hero-content {
   text-align: center;
-  color: white;
-  max-width: 600px;
-  padding: 20px;
-}
-
-.hero-content h1 {
+  color: var(--color-light-grey);
   font-family: var(--font-main);
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  color: var(--color-blue);
+  padding: 1rem 1.25rem;
+  position: relative;                /* sits above the background overlay */
+  z-index: 1;
+  /* subtle readability boost over photo */
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
+/* Title */
+.hero-content h1 {
+  font-size: 2.6rem;                 /* balanced for most screens */
+  margin-bottom: 0.8rem;
+  color: var(--color-blue);
+  line-height: 1.15;
+}
+
+/* Description */
 .hero-content p {
-  font-size: 1.2rem;
-  line-height: 1.5;
-  margin-bottom: 2rem;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
   color: var(--color-light-grey);
 }
 
+/* Backend status line */
+.backend-status {
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--color-red);
+  margin-bottom: 1.25rem;
+}
+
+/* CTA button */
 .cta-btn {
   background-color: var(--color-red);
-  color: white;
-  padding: 12px 28px;
+  color: var(--color-light-grey);
+  padding: 12px 26px;
   border: none;
   border-radius: 6px;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease-in-out;
+  transition: transform 0.1s ease, background 0.25s ease-in-out;
 }
 
 .cta-btn:hover {
-  background-color: rgb(125, 0, 0);
+  background-color: #b00321;
+  transform: scale(1.02);
+}
+
+.cta-btn:active {
+  background-color: #93001c;
+  transform: scale(0.98);
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .hero-content h1 {
+    font-size: 2.1rem;
+  }
+  .hero-content p {
+    font-size: 0.98rem;
+  }
 }

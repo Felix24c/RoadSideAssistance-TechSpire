@@ -136,4 +136,15 @@ def health(request):
 	return Response({"status": "OK"})
 
 
+# --- Services Data ---
+services = [
+    {"id": 1, "name": "Towing", "description": "Vehicle towing service", "price": 500},
+    {"id": 2, "name": "Fuel Delivery", "description": "Fuel delivered to your location", "price": 300},
+    {"id": 3, "name": "Flat Tire", "description": "Flat tire replacement service", "price": 400},
+    {"id": 4, "name": "Battery Jumpstart", "description": "Get your battery jump-started", "price": 350},
+]
+
+@api_view(["GET"])
+def services_view(request):
+    return Response(services)
 

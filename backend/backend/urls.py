@@ -39,4 +39,7 @@ urlpatterns = [
 
     # Health
     path('api/health', views.health),
+
+    #Services
+    path('api/services', views.services_view),  # GET: list of services
 ]

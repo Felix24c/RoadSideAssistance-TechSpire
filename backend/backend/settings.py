@@ -63,9 +63,12 @@ INSTALLED_APPS = [
     # Third-party apps for API
     'rest_framework',
     'drf_yasg',
+    #cors
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware', #cors
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -74,6 +77,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://RoadsideAssistancedomain.com", #final domain after deploying
+]
+
 
 ROOT_URLCONF = 'backend.urls'
 

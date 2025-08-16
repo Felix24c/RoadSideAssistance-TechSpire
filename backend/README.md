@@ -3,7 +3,7 @@
 
 ### 1. Clone the repository
 ```powershell
-git clone <your-repo-url>
+git clone https://github.com/Felix24c/RoadSideAssistance-TechSpire.git
 cd backend
 ```
 
@@ -39,4 +39,5 @@ http://127.0.0.1:8000/api/swagger/
 DJANGO_SECRET_KEY=
 ---
 If you see a `RuntimeError: DJANGO_SECRET_KEY environment variable not set`, make sure your `.env` file exists and contains the key as shown above.
+
 

@@ -62,9 +62,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Third-party apps for API
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
     'drf_yasg',
     #cors
     'corsheaders',
+    'api'
 ]
 
 MIDDLEWARE = [
@@ -81,6 +83,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://192.168.1.55:3000",
     "https://RoadsideAssistancedomain.com", #final domain after deploying
 ]
 

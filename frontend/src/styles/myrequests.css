@@ -1,0 +1,280 @@
+@import '../styles/variables.css';
+@import '../styles/pageBackground.css';
+@import '../styles/global.css';
+
+/* Main container */
+.myrequests-container {
+  max-width: 1100px;
+  width: 100%;
+  margin: 2rem auto;
+  padding: 24px 20px;
+  background: var(--color-black);
+  border-radius: 12px;
+  font-family: var(--font-main);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.17);
+  color: var(--color-light-grey);
+}
+
+.myrequests-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.myrequests-header h1 {
+  font-size: 2rem;
+  letter-spacing: 1px;
+  color: var(--color-blue);
+}
+
+/* ===================
+   GRID & RESPONSIVE
+   =================== */
+.requests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 26px 20px;
+}
+@media (max-width: 900px) {
+  .requests-grid { grid-template-columns: 1fr; }
+  .myrequests-container { padding: 10px 2vw; }
+}
+@media (max-width: 500px) {
+  .myrequests-header h1 { font-size: 1.35rem; }
+}
+
+/* ===================
+   CARD
+   =================== */
+.request-card {
+  background: var(--color-black);
+  border-radius: 10px;
+  box-shadow: 0 2px 11px #0003;
+  border: 2px solid var(--color-red);
+  padding: 22px 22px 15px 22px;
+  display: flex;
+  flex-direction: column;
+  min-height: 235px;
+  transition: box-shadow 0.18s cubic-bezier(.37,.52,.58,1.03);
+  font-size: 1rem;
+  position: relative;
+}
+.request-card:hover {
+  box-shadow: 0 8px 30px var(--color-blue), 0 2px 22px #0006;
+  border: 2px solid var(--color-blue);
+  z-index: 2;
+}
+
+/* ===================
+   CARD SECTIONS
+   =================== */
+.request-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 9px;
+  justify-content: flex-start;
+}
+
+.request-service {
+  font-size: 1.17rem;
+  font-weight: bold;
+  color: var(--color-blue);
+  margin-right: 15px;
+}
+.request-date {
+  font-size: 0.97rem;
+  color: #b7b7d6;
+  margin-left: auto;
+  text-align: right;
+  min-width: 115px;
+}
+
+/* ===================
+   BADGES
+   =================== */
+.badge {
+  border-radius: 15px;
+  font-weight: 600;
+  font-size: 0.99rem;
+  padding: 3px 15px;
+  letter-spacing: 1px;
+  min-width: 95px;
+  text-align: center;
+}
+.badge-pending {
+  background: #eacb2b28;
+  color: #e6b100;
+}
+.badge-accepted {
+  background: var(--color-blue);
+  color: #fff;
+}
+.badge-completed {
+  background: #19b884aa;
+  color: #fff;
+}
+.badge-cancelled {
+  background: var(--color-red);
+  color: #fff;
+}
+
+/* ===================
+   DETAILS
+   =================== */
+.request-details {
+  font-size: 1rem;
+  margin: 0.7rem 0 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.request-details > div {
+  display: flex;
+  align-items: center;
+  margin-bottom: 7px;
+}
+.request-details .label {
+  color: var(--color-blue);
+  font-weight: 600;
+  min-width: 86px;
+  margin-right: 7px;
+}
+
+.request-details .cost {
+  color: #43c17b;
+  font-weight: 700;
+}
+
+.request-details .muted, .request-details .unassigned {
+  color: #b3b6bd;
+  font-style: italic;
+  opacity: 0.75;
+}
+
+.map-link, .phone-link, .provider-phone {
+  color: var(--color-blue);
+  text-decoration: none;
+  margin-left: 4px;
+  font-size: 1.08em;
+  vertical-align: middle;
+  transition: color 0.18s;
+}
+.map-link:hover, .phone-link:hover, .provider-phone:hover {
+  color: var(--color-red);
+}
+
+.provider-phone-details {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.1em;
+  font-weight: 500;
+  font-size: 1em;
+}
+.provider-phone-details .phone-link {
+  margin-right: 2px;
+  font-size: 1.08em;
+}
+.provider-phone-details .phone-link svg {
+  vertical-align: middle;
+}
+
+/* ===================
+   EDIT FIELDS
+   =================== */
+.edit-notes {
+  width: 98.5%;
+  min-height: 49px;
+  border-radius: 7px;
+  font-size: 1em;
+  margin-top: 2px;
+  padding: 6px 8px;
+  border: 1px solid #414565;
+  background: #23243b;
+  color: #dbe7ff;
+}
+.edit-coord {
+  width: 110px;
+  font-size: 0.97em;
+  padding: 5px 6px;
+  border-radius: 5px;
+  background: #1f202d;
+  color: #f3f3f3;
+  border: 1px solid #383b55;
+  margin-right: 8px;
+  margin-bottom: 3px;
+}
+
+/* ===================
+   ACTIONS & BUTTONS
+   =================== */
+.request-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 13px;
+  margin-bottom: 0;
+}
+.btn {
+  padding: 0.42rem 1.3rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-family: var(--font-main);
+  font-weight: 600;
+  transition: background 0.14s, color 0.14s;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  background: #232847;
+  color: #fff;
+}
+.btn-edit { background: var(--color-blue); }
+.btn-edit:hover { background: #444beb; color: #fff; }
+.btn-cancel { background: var(--color-red); }
+.btn-cancel:hover { background: #bb0222; color: #fff; }
+.btn-save { background: #19b884; }
+.btn-save:hover { background: #12855c; color: #fff; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ===================
+   STATUS & TOAST
+   =================== */
+.status-msg {
+  text-align: center;
+  margin: 34px 0 12px 0;
+  font-size: 1.05em;
+  padding: 8px 0;
+  border-radius: 5px;
+}
+.status-msg.error { color: #ffd5d5; background: #d9042934; }
+.status-msg.loading { color: #d3dcff; background: #3f37c933; }
+.status-msg.empty { color: #bfc7dc; }
+
+.success-toast {
+  position: fixed;
+  bottom: 34px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  background: #2eb872;
+  padding: 13px 40px;
+  border-radius: 10px;
+  font-size: 1.13rem;
+  font-weight: 600;
+  z-index: 2000;
+  box-shadow: 0 4px 18px #0003;
+  min-width: 206px;
+  text-align: center;
+  animation: fadein .26s, fadeout .28s 1.25s;
+}
+@keyframes fadein { from {opacity: 0;} to {opacity: 1;} }
+@keyframes fadeout { from {opacity: 1;} to {opacity: 0;} }
+
+/* XS mobile fix */
+@media (max-width: 480px) {
+  .myrequests-header h1 { font-size: 1.07rem; }
+  .request-card { padding: 12px 6px 11px 8px; min-width: none; }
+  .edit-coord { width: 76px; font-size: 0.87em; }
+}

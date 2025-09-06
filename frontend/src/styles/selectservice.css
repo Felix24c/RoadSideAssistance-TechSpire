@@ -1,5 +1,6 @@
-/* src/styles/selectservice.css */
-@import url('../styles/variables.css');
+@import '../styles/variables.css';
+@import '../styles/pageBackground.css';
+@import '../styles/global.css';
 
 .select-service-container {
   padding: 1.5rem;
@@ -85,4 +86,32 @@ p.price {
 .select-btn:active {
   background-color: #93001c;
   transform: scale(0.97);
+}
+/* Spinner styles */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.spinner {
+  border: 5px solid rgba(255, 255, 255, 0.1); /* light border */
+  border-top: 5px solid var(--color-blue); /* top color for spin */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  font-size: 1rem;
+  color: var(--color-light-grey);
 }

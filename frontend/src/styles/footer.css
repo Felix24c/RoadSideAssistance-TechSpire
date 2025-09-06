@@ -1,4 +1,6 @@
 @import '../styles/variables.css';
+@import '../styles/pageBackground.css';
+@import '../styles/global.css';
 
 .footer {
   background-color: var(--color-black);

@@ -1,91 +1,174 @@
-/* src/styles/home.css */
+/* Home page main section layout */
 @import '../styles/variables.css';
 @import '../styles/pageBackground.css';
+@import '../styles/global.css';
 
-/* Full-screen hero content centered over the page background */
-.hero {
-  min-height: 100vh;                 /* fill the viewport */
+/* Container for BOTH hero and features, used TWICE on the page */
+.home-container {
+  max-width: 1100px;
+  margin: 36px auto;
+  padding: 18px 24px;
+  background: rgba(7,9,15,0.93);
+  border-radius: 10px;
+  box-shadow: 0 3px 11px rgba(0,0,0,0.18);
+  display: block;
+  min-height: 0;
+}
+
+/* First home-container: welcome/cta layout */
+.home-hero {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: center;
-  position: relative;                /* keep it above ::before overlay */
-  padding: 2rem 1rem;
-  z-index: 1;                        /* ensure above .page-background::before */
+  min-width: 0;
+  border: 2px solid var(--color-blue);
+  padding: 20px;
+  border-radius: 5px;
+  background: rgba(15, 16, 34, 0.93);
+  box-shadow: 0 2px 9px #22214312;
 }
 
-.hero-overlay {
-  width: 100%;
-  max-width: 800px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* transparent so the page background shows through */
-}
-
-.hero-content {
-  text-align: center;
-  color: var(--color-light-grey);
-  font-family: var(--font-main);
-  padding: 1rem 1.25rem;
-  position: relative;                /* sits above the background overlay */
-  z-index: 1;
-  /* subtle readability boost over photo */
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-}
-
-/* Title */
-.hero-content h1 {
-  font-size: 2.6rem;                 /* balanced for most screens */
-  margin-bottom: 0.8rem;
+.home-hero h1 {
+  font-size: 2.1rem;
   color: var(--color-blue);
-  line-height: 1.15;
+  margin-bottom: 0.55em;
 }
-
-/* Description */
-.hero-content p {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  margin-bottom: 1.25rem;
+.home-hero p {
   color: var(--color-light-grey);
+  font-size: 1.10rem;
+  margin-bottom: 0.85em;
 }
-
-/* Backend status line */
 .backend-status {
-  font-size: 0.95rem;
-  font-style: italic;
+  font-size: 0.99rem;
+  font-weight: bold;
   color: var(--color-red);
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.12em;
 }
-
-/* CTA button */
 .cta-btn {
   background-color: var(--color-red);
   color: var(--color-light-grey);
-  padding: 12px 26px;
+  padding: 12px 30px;
   border: none;
   border-radius: 6px;
-  font-size: 1rem;
+  font-size: 1.09rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.1s ease, background 0.25s ease-in-out;
+  margin-bottom: 14px;
+  box-shadow: 0 1.5px 8px #2d203212;
+  margin: 10px auto 14px 0;
+  transition: transform 0.1s, background 0.23s;
 }
-
 .cta-btn:hover {
   background-color: #b00321;
-  transform: scale(1.02);
+  transform: scale(1.03);
 }
 
-.cta-btn:active {
-  background-color: #93001c;
-  transform: scale(0.98);
+/* Quick links styled horizontally */
+.shortcut-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 13px;
+  margin-top: 2px;
+}
+.shortcut-btn {
+  background: rgba(63, 55, 201, 0.10);
+  color: var(--color-blue);
+  font-weight: 600;
+  padding: 7px 13px 7px 11px;
+  border-radius: 6px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  border: none;
+  transition: background 0.14s, color 0.14s;
+}
+.shortcut-btn:hover,
+.shortcut-btn:focus {
+  background: var(--color-blue);
+  color: #fff;
+  outline: none;
+}
+.shortcut-btn.logout {
+  color: var(--color-red);
+  background: rgba(217, 4, 41, 0.11);
+}
+.shortcut-btn.logout:hover {
+  background: var(--color-red);
+  color: #fff;
 }
 
-/* Responsive tweaks */
-@media (max-width: 768px) {
-  .hero-content h1 {
-    font-size: 2.1rem;
+/* Second home-container: features layout, horizontal on desktop */
+.home-features {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 26px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.feature-card.compact {
+  background: rgba(41, 45, 66, 0.83);
+  border-radius: 11px;
+  padding: 20px 22px 17px 20px;
+  min-width: 0;
+  min-height: unset;
+  max-width: 250px;
+  box-shadow: 0 2px 9px #3733460c;
+  margin-bottom: 0;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.feature-icon {
+  font-size: 2rem;
+  color: var(--color-blue);
+  margin-bottom: 6px;
+  display: block;
+}
+.feature-title {
+  color: var(--color-blue);
+  font-weight: 700;
+  font-size: 1.08rem;
+  margin-bottom: 5px;
+}
+.feature-desc {
+  color: var(--color-light-grey);
+  font-size: .97rem;
+  opacity: 0.96;
+  line-height: 1.26;
+}
+
+/* Responsive: features stack vertically on mobile/tablet */
+@media (max-width: 900px) {
+  .home-features {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
   }
-  .hero-content p {
-    font-size: 0.98rem;
+  .feature-card.compact {
+    max-width: 96vw;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-container {
+    padding: 6vw 2vw;
+  }
+  .home-hero h1 {
+    font-size: 1.23rem;
+  }
+  .feature-card.compact {
+    padding: 14px 8px;
+    font-size: 0.91rem;
+  }
+  .home-features {
+    gap: 10px;
   }
 }

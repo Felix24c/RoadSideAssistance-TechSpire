@@ -1,5 +1,6 @@
-/* src/styles/servicerequest.css */
-@import "../styles/variables.css";
+@import '../styles/variables.css';
+@import '../styles/pageBackground.css';
+@import '../styles/global.css';
 
 .service-request-container {
   max-width: 800px;
@@ -167,5 +168,104 @@ form {
   }
   .form-actions button {
     width: 100%;
+  }
+}
+/* Banner styles for feedback */
+.banner {
+  display: block;
+  border-radius: 6px;
+  margin: 0.5rem auto 1.2rem auto;
+  padding: 0.65rem 1rem;
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 2px 8px #22214318;
+  font-size: 1.00rem;
+  max-width: 450px;
+  letter-spacing: .01em;
+  transition: all 0.25s;
+  animation: fadeInScale 0.7s cubic-bezier(.4,2,.5,.95);
+}
+.banner-info {
+  background-color: var(--color-blue);
+  color: #fff;
+}
+.banner-success {
+  background: #1ce299;
+  color: var(--color-black);
+}
+.banner-error {
+  background: #ff4949;
+  color: var(--color-light-grey);
+  border: 1.5px solid var(--color-red);
+}
+@keyframes fadeInScale {
+  from {
+    transform: scale(.94);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.provider-auto {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  font-size: 1.08rem;
+  color: var(--color-blue);
+}
+.provider-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 100px;
+  background: #25244a;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 1px 4px #161a3c22;
+  font-size: 1.02rem;
+  margin-right: 4px;
+}
+.provider-type-pill {
+  background: var(--color-blue);
+  color: #fff;
+  border-radius: 11px;
+  padding: 2px 10px;
+  font-size: 0.93rem;
+  margin-right: 5px;
+}
+.provider-prompt {
+  color: #1ee583;
+  font-size: 0.93rem;
+  margin-left: 6px;
+  font-weight: 500;
+}
+.provider-none {
+  color: var(--color-red);
+  margin-left: 2px;
+}
+.spinner {
+  display: inline-block;
+  width: 19px; height: 19px;
+  border: 3px solid var(--color-light-grey);
+  border-top: 3px solid var(--color-blue);
+  border-radius: 50%;
+  animation: spinner-spin .8s linear infinite;
+  margin-bottom: -2px;
+  vertical-align: middle;
+}
+@keyframes spinner-spin {
+  from { transform: rotate(0); }
+  to   { transform: rotate(360deg);}
+}
+/* Extra mobile padding/tweaks */
+@media (max-width: 640px) {
+  .service-request-container {
+    padding: 0.83rem 0.4rem;
+  }
+  .banner {
+    font-size: 0.96rem;
+    max-width: 97vw;
   }
 }

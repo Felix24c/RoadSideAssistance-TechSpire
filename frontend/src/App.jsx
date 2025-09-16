@@ -14,9 +14,10 @@ import ProviderDashboard from "./pages/ProviderDashboard"; // <-- Add this impor
 import './styles/global.css';
 
 // ✅ Protected route wrapper for users (must be logged in)
-const PrivateRoute = ({ children }) => {
+const PrivateUserRoute = ({ children }) => {
   const isLoggedIn = !!localStorage.getItem("userId");
-  return isLoggedIn ? children : <Navigate to="/login" replace />;
+  const role = localStorage.getItem("role");
+  return (isLoggedIn && role === "user") ? children : <Navigate to="/login" replace />;
 };
 
 // ✅ Protected route wrapper for providers (must be logged in + provider role)
@@ -60,53 +61,53 @@ function App() {
 
           {/* User/General Protected routes */}
           <Route
-            path="/"
-            element={
-              <PrivateRoute>
-                <Home />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/about"
-            element={
-              <PrivateRoute>
-                <About />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/contact"
-            element={
-              <PrivateRoute>
-                <Contact />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/select-service"
-            element={
-              <PrivateRoute>
-                <SelectService />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/service-request"
-            element={
-              <PrivateRoute>
-                <ServiceRequest />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/myrequests"
-            element={
-              <PrivateRoute>
-                <MyRequests />
-              </PrivateRoute>
-            }
-          />
+  path="/"
+  element={
+    <PrivateUserRoute>
+      <Home />
+    </PrivateUserRoute>
+  }
+/>
+<Route
+  path="/about"
+  element={
+    <PrivateUserRoute>
+      <About />
+    </PrivateUserRoute>
+  }
+/>
+<Route
+  path="/contact"
+  element={
+    <PrivateUserRoute>
+      <Contact />
+    </PrivateUserRoute>
+  }
+/>
+<Route
+  path="/select-service"
+  element={
+    <PrivateUserRoute>
+      <SelectService />
+    </PrivateUserRoute>
+  }
+/>
+<Route
+  path="/service-request"
+  element={
+    <PrivateUserRoute>
+      <ServiceRequest />
+    </PrivateUserRoute>
+  }
+/>
+<Route
+  path="/myrequests"
+  element={
+    <PrivateUserRoute>
+      <MyRequests />
+    </PrivateUserRoute>
+  }
+/>
 
           {/* Catch-all: redirect unknown routes to login */}
           <Route path="*" element={<Navigate to="/login" replace />} />

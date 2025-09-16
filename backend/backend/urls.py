@@ -47,4 +47,8 @@ urlpatterns = [
     path('api/myrequests', views.my_requests_view),  # GET current user's requests
     path('api/myrequests/<int:request_id>', views.my_request_patch_view),  # PATCH edit/cancel by user
 
+    # Request Confirmation
+    path('api/requests/<int:id>/confirm-arrived', views.confirm_arrived, name='confirm-arrived'),
+    path('api/requests/<int:id>/confirm-completed', views.confirm_completed, name='confirm-completed'),
+
 ]

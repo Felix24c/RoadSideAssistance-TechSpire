@@ -8,7 +8,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(ServiceProvider)
 class ServiceProviderAdmin(admin.ModelAdmin):
-    list_display = ("name", "type", "phone", "rating", "lat", "lng", "created")
+    list_display = ("name", "email", "type", "phone", "rating", "lat", "lng", "created")
     search_fields = ("name", "type")
 
 @admin.register(ServiceRequest)

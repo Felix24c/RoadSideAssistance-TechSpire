@@ -16,6 +16,7 @@ class UserProfile(models.Model):
 
 class ServiceProvider(models.Model):
     name = models.CharField(max_length=120)
+    email = models.EmailField(unique=True)
     type = models.CharField(max_length=60)
     lat = models.FloatField()
     lng = models.FloatField()
@@ -53,6 +54,10 @@ class ServiceRequest(models.Model):
     lat = models.FloatField()
     lng = models.FloatField()
     estimated_cost = models.FloatField(default=0)
+    arrived_by_provider = models.BooleanField(default=False)
+    arrived_by_user = models.BooleanField(default=False)
+    completed_by_provider = models.BooleanField(default=False)
+    completed_by_user = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 

@@ -36,7 +36,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ServiceProviderSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceProvider
-        fields = ['id', 'name', 'type', 'lat', 'lng', 'rating', 'created', 'phone']
+        fields = "__all__"
         extra_kwargs = {'phone': {'read_only': True}}  # ensure phone is included and not writable
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -53,7 +53,10 @@ class ServiceRequestUserSerializer(serializers.ModelSerializer):
         model = ServiceRequest
         fields = [
             'id', 'service', 'user', 'provider', 'status', 'notes',
-            'lat', 'lng', 'estimated_cost', 'created', 'updated'
+            'lat', 'lng', 'estimated_cost', 'created', 'updated',
+
+             'arrived_by_provider', 'arrived_by_user', 'completed_by_provider', 'completed_by_user'
+             
         ]
 
 
@@ -61,3 +64,13 @@ class ServiceRequestEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceRequest
         fields = ['notes', 'lat', 'lng', 'status']
+
+
+class ServiceRequestSerializer(serializers.ModelSerializer):
+    provider = ServiceProviderSerializer()
+    service = ServiceSerializer()
+    user = serializers.StringRelatedField()
+
+    class Meta:
+        model = ServiceRequest
+        fields = '__all__'

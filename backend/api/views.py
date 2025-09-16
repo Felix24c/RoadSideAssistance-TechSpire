@@ -3,8 +3,8 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -14,9 +14,9 @@ from .serializers import UserSignupSerializer
 
 
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes, authentication_classes
+from rest_framework.decorators import permission_classes, authentication_classes, api_view
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .serializers import ServiceRequestUserSerializer, ServiceRequestEditSerializer
+from .serializers import ServiceRequestSerializer, ServiceRequestUserSerializer, ServiceRequestEditSerializer
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -67,6 +67,7 @@ def providers_view(request):
             {
                 "id": p.id,
                 "name": p.name,
+                "email": p.email,
                 "type": p.type,
                 "lat": p.lat,
                 "lng": p.lng,
@@ -114,7 +115,15 @@ def requests_view(request):
                     "price": r.service.price
                 },
                 "user": r.user.username if r.user else None,
-                "provider": r.provider.name if r.provider else None,
+                "provider": {
+                    "id": r.provider.id,
+                    "name": r.provider.name,
+                    "email": r.provider.email,
+                    "type": r.provider.type,
+                    "lat": r.provider.lat,
+                    "lng": r.provider.lng,
+                    "rating": r.provider.rating
+                } if r.provider else None,
                 "status": r.status,
                 "lat": r.lat,
                 "lng": r.lng,
@@ -142,47 +151,91 @@ def requests_view(request):
             lng=lng
         )
 
+        # Return full provider info
         return Response({
             "id": req.id,
             "service": {
                 "id": service.id,
                 "name": service.name,
+                "description": service.description,
                 "price": service.price
             },
             "user": user.username,
-            "provider": provider.name,
+            "provider": {
+                "id": provider.id,
+                "name": provider.name,
+                "email": provider.email,
+                "type": provider.type,
+                "lat": provider.lat,
+                "lng": provider.lng,
+                "rating": provider.rating
+            },
             "status": req.status,
+            "lat": req.lat,
+            "lng": req.lng,
             "estimated_cost": req.estimated_cost
         }, status=status.HTTP_201_CREATED)
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def request_view(request, request_id):
     req = get_object_or_404(ServiceRequest, id=request_id)
-    
+
     if request.method == 'GET':
-        return Response({
-            "id": req.id,
-            "service": {
-                "id": req.service.id,
-                "name": req.service.name,
-                "description": req.service.description,
-                "price": req.service.price
-            },
-            "status": req.status,
-            "user": req.user.username if req.user else None,
-            "provider": req.provider.name if req.provider else None,
-            "estimated_cost": req.estimated_cost
-        })
-    
+        serializer = ServiceRequestUserSerializer(req)
+        return Response(serializer.data)
+
     elif request.method == 'PUT':
-        req.status = request.data.get('status', req.status)
+        data = request.data
+        new_status = data.get('status', req.status)
+        if new_status == "Accepted":
+            provider_email = data.get('provider')
+            provider = None
+
+            # Lookup provider by email
+            if provider_email:
+                provider = ServiceProvider.objects.filter(email__iexact=provider_email).first()
+
+            if not provider:
+                return Response({"error": "Provider profile not found."}, status=400)
+
+            # Check for active job
+            has_active_job = ServiceRequest.objects.filter(
+                provider=provider,
+                status__in=["Accepted", "Arrived"]
+            ).exclude(id=req.id).exists()
+
+            if has_active_job:
+                return Response(
+                    {"error": "You must complete existing active job before accepting a new request."},
+                    status=400
+                )
+
+            req.provider = provider
+            req.status = new_status
+            req.save()
+
+            serializer = ServiceRequestUserSerializer(req)
+            return Response(serializer.data)
+
+        # Other status updates
+        if 'status' in data:
+            req.status = data['status']
+        if 'notes' in data:
+            req.notes = data['notes']
+        if 'lat' in data and 'lng' in data:
+            req.lat = data['lat']
+            req.lng = data['lng']
+
         req.save()
-        return Response({"id": req.id, "status": req.status})
-    
+        serializer = ServiceRequestUserSerializer(req)
+        return Response(serializer.data)
+
     elif request.method == 'DELETE':
         req.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
+        return Response(status=204)
+    
 # -------------------------------
 # Services
 # -------------------------------
@@ -281,36 +334,82 @@ def login_user(request):
 def my_requests_view(request):
     """
     Return logged-in user's own service requests.
+    Supports optional filter query param ?status=active to get active requests only.
     """
     user = request.user
-    requests = ServiceRequest.objects.filter(user=user).order_by('-created')
+    status_filter = request.query_params.get('status', None)
+
+    if status_filter == 'active':
+        active_statuses = ["Pending", "Accepted", "Arrived"]
+        requests = ServiceRequest.objects.filter(user=user, status__in=active_statuses).order_by('-created')
+    else:
+        requests = ServiceRequest.objects.filter(user=user).order_by('-created')
+
     serializer = ServiceRequestUserSerializer(requests, many=True)
     return Response(serializer.data)
 
+@csrf_exempt
 @api_view(['PATCH'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def my_request_patch_view(request, request_id):
     """
-    Allow only the owner to PATCH notes, lat, lng, status (can set status to 'Cancelled').
-    Only allowed if request is Pending or Cancelled.
+    Allow editing (PATCH) for requests with statuses Pending, Accepted, Arrived.
     """
     user = request.user
     try:
         obj = ServiceRequest.objects.get(id=request_id, user=user)
     except ServiceRequest.DoesNotExist:
-        return Response({'error': 'Not found.'}, status=404)
+        return Response({'error': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-    if obj.status not in ["Pending", "Cancelled"]:
-        return Response({'error': 'Can only edit or cancel pending/cancelled requests.'}, status=403)
+    if obj.status not in ["Pending", "Accepted", "Arrived"]:
+        return Response({'error': 'Can only edit requests with status Pending, Accepted or Arrived.'},
+                        status=status.HTTP_403_FORBIDDEN)
 
     serializer = ServiceRequestEditSerializer(obj, data=request.data, partial=True)
     if serializer.is_valid():
-        updated_status = serializer.validated_data.get('status')
-        # Only allow set to 'Cancelled' for status update via PATCH
-        if updated_status and updated_status not in ["Pending", "Cancelled"]:
-            return Response({"error": "Can only set status to Pending or Cancelled."}, status=400)
+        # Optional: restrict status changes here if required
         serializer.save()
-        return Response({"success": "Request updated.", "data": ServiceRequestUserSerializer(obj).data})
+        return Response({'success': 'Request updated.', 'data': ServiceRequestUserSerializer(obj).data})
     else:
-        return Response(serializer.errors, status=400)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# --- CONFIRM ACTION (ARRIVED, COMPLETED) BY USER OR PROVIDER ---
+# Arrived confirmation
+@api_view(['PATCH'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def confirm_arrived(request, id):
+    req = ServiceRequest.objects.get(pk=id)
+    role = request.data.get("role")
+    if role == "provider":
+        req.arrived_by_provider = True
+    elif role == "user":
+        req.arrived_by_user = True
+    else:
+        return Response({"error": "Invalid role"}, status=400)
+    # If both confirmed, update main status
+    if req.arrived_by_provider and req.arrived_by_user:
+        req.status = "Arrived"
+    req.save()
+    return Response(ServiceRequestSerializer(req).data, status=200)
+
+# Completed confirmation
+@api_view(['PATCH'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def confirm_completed(request, id):
+    req = ServiceRequest.objects.get(pk=id)
+    role = request.data.get("role")
+    if role == "provider":
+        req.completed_by_provider = True
+    elif role == "user":
+        req.completed_by_user = True
+    else:
+        return Response({"error": "Invalid role"}, status=400)
+    # If both confirmed, update main status
+    if req.completed_by_provider and req.completed_by_user:
+        req.status = "Completed"
+    req.save()
+    return Response(ServiceRequestSerializer(req).data, status=200)

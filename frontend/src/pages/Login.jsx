@@ -55,7 +55,21 @@ localStorage.setItem("role", data.role);
         setSuccess(true);
         setTimeout(() => {
           if (data.role === "provider") {
-  navigate("/provider-dashboard");
+  // Fetch provider info to get the name
+  fetch(`${backendURL}/api/providers`, {
+    headers: { Authorization: `Bearer ${data.access}` }
+  })
+    .then(res => res.json())
+    .then(pData => {
+      let providersList = Array.isArray(pData) ? pData : pData.results || [];
+      const providerInfo = providersList.find(
+        p => p.email && p.email.toLowerCase() === data.email.toLowerCase()
+      );
+      if (providerInfo) {
+        localStorage.setItem("providerName", providerInfo.name);
+      }
+      navigate("/provider-dashboard");
+    });
 } else {
   navigate("/");
 }

@@ -28,8 +28,17 @@
   background: rgba(15, 16, 34, 0.93);
   box-shadow: 0 2px 9px #22214312;
 }
-
-.home-hero h1 {
+h1{
+  font-size: 1.8rem;
+  color: var(--color-blue);
+  margin-bottom: 0.55em;
+}
+h2{
+  font-size: 1.6rem;
+  color: var(--color-blue);
+  margin-bottom: 0.55em;
+}
+.home-hero h1{
   font-size: 2.1rem;
   color: var(--color-blue);
   margin-bottom: 0.55em;
@@ -45,7 +54,7 @@
   color: var(--color-red);
   margin-bottom: 1.12em;
 }
-.cta-btn {
+.cta-btn{
   background-color: var(--color-red);
   color: var(--color-light-grey);
   padding: 12px 30px;
@@ -63,7 +72,25 @@
   background-color: #b00321;
   transform: scale(1.03);
 }
+.refresh-btn {
+  background-color: var(--color-blue);
+  color: var(--color-light-grey);
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.09rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 14px;
+  box-shadow: 0 1.5px 8px #2d203212;
+  margin: 10px auto 14px 0;
+  transition: transform 0.1s, background 0.23s;
+}
 
+.refresh-btn:hover {
+  background-color: #0056b3;
+  transform: scale(1.03);
+}
 /* Quick links styled horizontally */
 .shortcut-links {
   display: flex;
@@ -71,7 +98,7 @@
   gap: 13px;
   margin-top: 2px;
 }
-.shortcut-btn {
+.shortcut-btn{
   background: rgba(63, 55, 201, 0.10);
   color: var(--color-blue);
   font-weight: 600;
@@ -141,6 +168,42 @@
   font-size: .97rem;
   opacity: 0.96;
   line-height: 1.26;
+}
+.card-status-msg {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 1.04rem;
+  padding: 10px 15px;
+  border-radius: 7px;
+  box-shadow: 0 1px 11px #0002;
+  font-weight: 600;
+}
+
+.card-status-msg.success {
+  background: #19b88428;
+  color: #19b884;
+  border: 1px solid #19b884;
+}
+
+.card-status-msg.cancelled {
+  background: #d9042920;
+  color: #d90429;
+  border: 1px solid #d90429;
+}
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid var(--color-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
 }
 
 /* Responsive: features stack vertically on mobile/tablet */

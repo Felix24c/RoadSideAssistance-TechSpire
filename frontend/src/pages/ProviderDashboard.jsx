@@ -5,60 +5,144 @@ import "../styles/providerdashboard.css";
 import { FaSyncAlt, FaCheckCircle, FaTimesCircle, FaMapMarkerAlt, FaPhoneAlt } from "react-icons/fa";
 
 const statusStyles = {
-  Pending: { color: "#FFD700", bg: "rgba(255,215,0,0.16)" },
-  Accepted: { color: "#2E86AB", bg: "rgba(46,134,171,0.14)" },
-  Arrived: { color: "#9A37C9", bg: "rgba(154,55,201,0.14)" },
+  Pending:   { color: "#FFD700", bg: "rgba(255,215,0,0.16)" },
+  Accepted:  { color: "#2E86AB", bg: "rgba(46,134,171,0.14)" },
+  Arrived:   { color: "#9C37C9", bg: "rgba(154,55,201,0.14)" },
   Completed: { color: "#19B87D", bg: "rgba(25,184,125,0.15)" },
   Cancelled: { color: "#B90429", bg: "rgba(217,4,41,0.13)" }
 };
+
 const backendURL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
 
 const ProviderDashboard = () => {
-  const [jobs, setJobs] = useState([]);
+  const [assignedJobs, setAssignedJobs] = useState([]);
+  const [availableJobs, setAvailableJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedJob, setSelectedJob] = useState(null);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [acceptingJobId, setAcceptingJobId] = useState(null);
 
-  // Modal close on escape
-  useEffect(() => {
-    const esc = (e) => (e.key === "Escape" ? setSelectedJob(null) : null);
-    window.addEventListener("keydown", esc);
-    return () => window.removeEventListener("keydown", esc);
-  }, []);
+  const username = (localStorage.getItem("username") || "").toLowerCase();
 
+  // Fetch & filter logic
   const fetchJobs = async () => {
     setLoading(true);
     setError(null);
+
     try {
       const token = localStorage.getItem("access");
-      if (!token) throw new Error("Not logged in");
-      const res = await fetch(`${backendURL}/api/requests`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      if (!token) {
+        setError("Not logged in.");
+        setLoading(false);
+        return;
+      }
+
+      const headers = { Authorization: `Bearer ${token}` };
+      let res = await fetch(`${backendURL}/api/requests`, { headers });
+      if (res.status === 401) {
+        setError("Session expired. Please log in again.");
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
-      const username = localStorage.getItem("username");
-      let filtered = (data || []).filter(
-        (j) => j.provider && j.provider.toLowerCase() === username?.toLowerCase()
+
+      let providerType = localStorage.getItem("providerType");
+      const pRes = await fetch(`${backendURL}/api/providers`, { headers });
+      if (pRes.status === 401) {
+        setError("Session expired. Please log in again.");
+        setLoading(false);
+        return;
+      }
+      const pData = await pRes.json();
+      let providersList = [];
+      if (Array.isArray(pData)) {
+        providersList = pData;
+      } else if (pData?.results && Array.isArray(pData.results)) {
+        providersList = pData.results;
+      } else {
+        setError("Cannot retrieve provider data.");
+        setLoading(false);
+        return;
+      }
+      const email = localStorage.getItem("email") || "";
+      const providerInfo = providersList.find(
+        (p) => p.email && p.email.toLowerCase() === email.toLowerCase()
       );
-      setJobs(filtered.sort((a, b) => b.id - a.id));
+      if (providerInfo) {
+        providerType = providerInfo.type.toLowerCase();
+        localStorage.setItem("providerType", providerType);
+        localStorage.setItem("providerName", providerInfo.name);
+        localStorage.setItem("providerEmail", providerInfo.email);
+      } else {
+        providerType = "";
+      }
+      if (!providerInfo) {
+        alert(`Provider profile not found for email: ${email}`);
+      }
+
+      // Filter assigned jobs
+      const providerEmail = (localStorage.getItem("email") || "").toLowerCase();
+      const assigned = data.filter(job =>
+        job.provider &&
+        job.provider.email &&
+        job.provider.email.toLowerCase() === providerEmail &&
+        ["Pending", "Accepted", "Arrived", "Completed", "Cancelled"].includes(job.status)
+      );
+
+      // Filter available jobs matching provider's type and unassigned
+      const available = data.filter(
+        job =>
+          !job.provider &&
+          job.status === "Pending" &&
+          job.service &&
+          job.service.name &&
+          providerType &&
+          job.service.name.toLowerCase() === providerType
+      );
+      setAssignedJobs(assigned.sort((a, b) => b.id - a.id));
+      setAvailableJobs(available);
     } catch (e) {
-      setError(e.message || "Failed to load jobs");
+      setError(e.message || "Failed to fetch jobs.");
     } finally {
       setLoading(false);
       setRefreshing(false);
+      setAcceptingJobId(null);
     }
   };
 
   useEffect(() => {
+    const fetchProviderInfo = async () => {
+      const email = localStorage.getItem("email") || "";
+      const res = await fetch(`${backendURL}/api/providers`);
+      const providers = await res.json();
+      const providerInfo = providers.find(
+        p => p.email && p.email.toLowerCase() === email.toLowerCase()
+      );
+      if (providerInfo) {
+        localStorage.setItem("providerName", providerInfo.name);
+        localStorage.setItem("providerEmail", providerInfo.email);
+      }
+    };
+    fetchProviderInfo();
     fetchJobs();
     const timer = setInterval(fetchJobs, 30000);
     return () => clearInterval(timer);
-    // eslint-disable-next-line
   }, []);
 
+  // --- Split jobs ---
+  const activeAssignedJobs = assignedJobs.filter(
+    job => ["Accepted", "Arrived"].includes(job.status)
+  );
+  const pastAssignedJobs = assignedJobs.filter(
+    job => ["Completed", "Cancelled"].includes(job.status)
+  );
+
+  const hasActiveJob = activeAssignedJobs.length > 0;
+
+  // Status badge UI
   const statusBadge = (status) => {
-    const { color, bg } = statusStyles[status] || statusStyles["Pending"];
+    const { color, bg } = statusStyles[status] || statusStyles.Pending;
     return (
       <span
         style={{
@@ -66,209 +150,374 @@ const ProviderDashboard = () => {
           color,
           background: bg,
           borderRadius: 12,
-          fontSize: "0.96em",
-          padding: "3.5px 14px",
           fontWeight: 700,
-          marginRight: 4,
+          fontSize: "0.95em",
+          padding: "4px 14px",
+          marginRight: 6,
           minWidth: 80,
-          textAlign: "center"
+          textAlign: "center",
         }}
       >
         {status}
-        {status === "Completed" && <FaCheckCircle style={{ marginLeft: 6, color }} />}
-        {status === "Cancelled" && <FaTimesCircle style={{ marginLeft: 6, color }} />}
+        {status === "Completed" && (
+          <FaCheckCircle style={{ marginLeft: 6, color }} />
+        )}
+        {status === "Cancelled" && (
+          <FaTimesCircle style={{ marginLeft: 6, color }} />
+        )}
       </span>
     );
   };
 
-  // Accept or Cancel Actions
-  const handleJobStatusChange = async (jobId, newStatus) => {
+  // Provider actions: bulletproof
+  const renderProviderActions = (job) => {
+    if (["Cancelled", "Completed"].includes(job.status)) return null;
+    // Mark as Arrived (only for accepted awaiting provider)
+    if (job.status === "Accepted" && !job.arrived_by_provider) {
+      return (
+        <button onClick={() => sendProviderAction(job.id, "confirm-arrived")} className="provider-btn provider-btn-arrived">
+          <FaMapMarkerAlt style={{marginRight:3}}/> Mark as Arrived
+        </button>
+      );
+    }
+    if (job.status === "Accepted" && job.arrived_by_provider && !job.arrived_by_user) {
+      return <span className="provider-waiting" style={{color:"#FFD700"}}>Waiting for user to confirm arrival...</span>;
+    }
+    if (job.status === "Arrived" && !job.completed_by_provider) {
+      return (
+        <button onClick={() => sendProviderAction(job.id, "confirm-completed")} className="provider-btn provider-btn-complete">
+          <FaCheckCircle style={{marginRight:3}}/> Mark as Completed
+        </button>
+      );
+    }
+    if (job.status === "Arrived" && job.completed_by_provider && !job.completed_by_user) {
+      return <span className="provider-waiting" style={{color:"#19B87D"}}>Waiting for user to confirm completion...</span>;
+    }
+    if (job.status === "Completed") {
+      return <span className="provider-complete" style={{color:"#19B87D"}}>Request fully completed!</span>;
+    }
+    return null;
+  };
+
+  // PATCH logic for arrived/complete confirmation (calls the two endpoints)
+  const sendProviderAction = async (jobId, actionEndpoint) => {
+    setAcceptingJobId(jobId);
     try {
       const token = localStorage.getItem("access");
-      if (!token) throw new Error("Not logged in");
+      const endpoint = actionEndpoint === "confirm-arrived"
+        ? `/api/requests/${jobId}/confirm-arrived`
+        : `/api/requests/${jobId}/confirm-completed`;
+      const res = await fetch(`${backendURL}${endpoint}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ role: "provider" })
+      });
+      if (!res.ok) {
+        throw new Error("Backend error: " + (await res.text()));
+      }
+      await fetchJobs();
+    } catch (e) {
+      alert("Could not update job: " + (e.message || e));
+    } finally {
+      setAcceptingJobId(null);
+    }
+  };
+
+  // Accept logic (only if provider is not busy)
+  const handleJobAction = async (jobId, newStatus) => {
+    setAcceptingJobId(jobId);
+    try {
+      const token = localStorage.getItem("access");
+      if (!token) {
+        alert("Please login again.");
+        setAcceptingJobId(null);
+        return;
+      }
+      const providerId = localStorage.getItem("providerId");
+      const providerEmail = localStorage.getItem("providerEmail");
+
+      let payload = { status: newStatus };
+      if (newStatus === "Accepted") {
+        payload.provider = providerId || providerEmail;
+      }
+
       const res = await fetch(`${backendURL}/api/requests/${jobId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Failed to update job status");
-      fetchJobs();
+
+      if (res.status === 401) {
+        alert("Session expired. Please login again.");
+        setAcceptingJobId(null);
+        setError("Session expired. Please login again.");
+        return;
+      }
+      if (!res.ok) {
+        let errMsg = "Failed to update job.";
+        try {
+          const err = await res.json();
+          errMsg = err.error || errMsg;
+        } catch {
+          errMsg = "Server error. Please check backend logs.";
+        }
+        throw new Error(errMsg);
+      }
+      await fetchJobs();
       setSelectedJob(null);
     } catch (e) {
-      alert(e.message || "Action failed");
+      alert(e.message || "Error occurred.");
+      setAcceptingJobId(null);
     }
   };
-
-  // Stats
-  const pending = jobs.filter((j) => j.status === "Pending").length;
-  const accepted = jobs.filter((j) => j.status === "Accepted").length;
-  const arrived = jobs.filter((j) => j.status === "Arrived").length;
-  const completed = jobs.filter((j) => j.status === "Completed").length;
 
   return (
     <div className="page-background" style={{ minHeight: "100vh" }}>
       <div className="provider-dashboard-container">
         <div className="provider-bar">
+          {error && (
+            <div className="error-message" style={{ color: "red", margin: "10px 0" }}>
+              {error}
+            </div>
+          )}
           <div>
-            <span>Welcome, </span>
-            <span className="provider-label">{localStorage.getItem("username")}</span>
+            Welcome, <span className="provider-label">{localStorage.getItem("username")}</span>
+            <button className="shortcut-btn logout"
+              onClick={() => {
+                localStorage.clear();
+                window.location.href = "/login";
+              }}
+            >Logout</button>
           </div>
           <button
             onClick={() => {
               setRefreshing(true);
               fetchJobs();
             }}
-            style={{
-              background: "#3F37C9", color: "#fff", border: "none", borderRadius: 6,
-              fontSize: "1.03rem", fontWeight: "700", padding: "10px 26px", cursor: "pointer",
-              boxShadow: "0 1.5px 8px #2d203212", display: "flex", alignItems: "center"
-            }}
             title="Refresh"
             disabled={refreshing}
+            style={{
+              background: "#3F37C9",
+              color: "white",
+              padding: "10px 26px",
+              fontWeight: 700,
+              borderRadius: 6,
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              boxShadow: "0 2px 7px rgba(63,55,201,0.5)",
+            }}
           >
-            <FaSyncAlt style={{ marginRight: 7, opacity: refreshing ? 0.74 : 1, animation: refreshing ? "spin 1s linear infinite" : "" }} />
+            <FaSyncAlt
+              style={{
+                marginRight: 8,
+                animation: refreshing ? "spin 1s linear infinite" : "none",
+              }}
+            />
             {refreshing ? "Refreshing..." : "Refresh"}
           </button>
         </div>
-        {/* Stat cards */}
+
         <div className="provider-stats-row">
-          <StatCard title="Pending" value={pending} color="#FFD700" />
-          <StatCard title="Accepted" value={accepted} color="#2E86AB" />
-          <StatCard title="Arrived" value={arrived} color="#9A37C9" />
-          <StatCard title="Completed" value={completed} color="#19B87D" />
+          <StatCard title="Assigned" value={activeAssignedJobs.length} color="#2E86AB" />
+          <StatCard title="Available" value={availableJobs.length} color="#FFD700" />
         </div>
-        <div style={{
-          background: "rgba(31,37,54, 0.96)", borderRadius: 10, padding: "18px 8px 12px 8px",
-          boxShadow: "0 2px 12px #20263a25", marginBottom: 10
-        }}>
-          <h2 style={{
-            color: "#F5F5F5", fontWeight: "700", marginLeft: 12,
-            fontSize: "1.15rem", marginBottom: 13, letterSpacing: ".5px"
-          }}>
-            My Assigned Service Jobs
-          </h2>
-          {loading ? (
-            <div style={{ color: "#3F37C9", marginLeft: 16, fontWeight: 700, opacity: 0.86 }}>Loading jobs...</div>
-          ) : error ? (
-            <div style={{ color: "#B90429", marginLeft: 15, fontWeight: 600 }}>{error}</div>
-          ) : jobs.length === 0 ? (
-            <div style={{ color: "#aaa", marginLeft: 15 }}>No jobs assigned to you yet.</div>
-          ) : (
-            <div className="provider-jobs-list">
-              {jobs.map(job => (
-                <div
-                  className="job-card"
-                  key={job.id}
-                  tabIndex={0}
-                  onClick={() => setSelectedJob(job)}
-                  onKeyDown={e => (e.key === "Enter" || e.key === " ") && setSelectedJob(job)}
-                  aria-label={`View job for ${job.service?.name || "Service"}`}
-                  style={{
-                    border: "2px solid " + (statusStyles[job.status]?.color || "#333"),
+
+        <section>
+          <h3>My Assigned Jobs</h3>
+          {loading && <p>Loading assigned jobs...</p>}
+          {!loading && activeAssignedJobs.length === 0 && <p>No active assigned jobs found.</p>}
+          <div className="jobs-list">
+            {activeAssignedJobs.map((job) => (
+              <div
+                key={job.id}
+                className="job-card"
+                tabIndex={0}
+                onClick={() => setSelectedJob(job)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") setSelectedJob(job);
+                }}
+                aria-label={`Job details for ${job.service?.name || "Service"}`}
+                style={{
+                  border: `2px solid ${statusStyles[job.status]?.color || "#333"}`,
+                }}
+              >
+                <div className="job-card-header">
+                  {statusBadge(job.status)}
+                  <span>{job.service?.name || "—"}</span>
+                </div>
+                <div>Requested by: <b>{job.user}</b></div>
+                <div>Cost: ₹{job.estimated_cost || job.service?.price || "—"}</div>
+                <div className="job-location">
+                  <FaMapMarkerAlt style={{ color: "#3F7AFD", opacity: 0.9 }} />
+                  <a
+                    href={`https://maps.google.com/?q=${job.lat},${job.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {Number(job.lat).toFixed(3)}, {Number(job.lng).toFixed(3)}
+                  </a>
+                </div>
+                <div className="job-actions" style={{marginTop:8}}>
+                  {renderProviderActions(job)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* JOB HISTORY SECTION */}
+        <section style={{ marginTop: 30 }}>
+          <h3>Job History</h3>
+          {!loading && pastAssignedJobs.length === 0 && <p>No completed or cancelled jobs yet.</p>}
+          <div className="jobs-list">
+            {pastAssignedJobs.map((job) => (
+              <div
+                key={job.id}
+                className="job-card"
+                tabIndex={0}
+                style={{
+                  border: `2px solid ${statusStyles[job.status]?.color || "#333"}`,
+                  opacity: 0.75
+                }}
+                aria-label={`Past job details for ${job.service?.name || "Service"}`}
+              >
+                <div className="job-card-header">
+                  {statusBadge(job.status)}
+                  <span>{job.service?.name || "—"}</span>
+                </div>
+                <div>Requested by: <b>{job.user}</b></div>
+                <div>Cost: ₹{job.estimated_cost || job.service?.price || "—"}</div>
+                <div className="job-location">
+                  <FaMapMarkerAlt style={{ color: "#3F7AFD", opacity: 0.9 }} />
+                  <a
+                    href={`https://maps.google.com/?q=${job.lat},${job.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {Number(job.lat).toFixed(3)}, {Number(job.lng).toFixed(3)}
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section style={{ marginTop: 20 }}>
+          <h3>Available Jobs for Acceptance</h3>
+          {loading && <p>Loading available jobs...</p>}
+          {!loading && availableJobs.length === 0 && <p>No available jobs currently.</p>}
+
+          <div className="jobs-list available-jobs">
+            {availableJobs.map((job) => (
+              <div
+                key={job.id}
+                className="job-card"
+                tabIndex={0}
+                onClick={() => setSelectedJob(job)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") setSelectedJob(job);
+                }}
+                aria-label={`Job details for ${job.service?.name || "Service"}`}
+              >
+                <div className="job-card-header">
+                  {statusBadge(job.status)}
+                  <span>{job.service?.name || "—"}</span>
+                </div>
+                <div>Requested by: <b>{job.user}</b></div>
+                <div>Cost: ₹{job.estimated_cost || job.service?.price || "—"}</div>
+                <div className="job-location">
+                  <FaMapMarkerAlt style={{ color: "#3F7AFD", opacity: 0.9 }} />
+                  <a
+                    href={`https://maps.google.com/?q=${job.lat},${job.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {Number(job.lat).toFixed(3)}, {Number(job.lng).toFixed(3)}
+                  </a>
+                </div>
+                <button
+                  disabled={activeAssignedJobs.length > 0}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleJobAction(job.id, "Accepted");
                   }}
+                  title={activeAssignedJobs.length > 0 ? "Complete your current job before accepting new ones." : "Accept Job"}
                 >
-                  <div>{statusBadge(job.status)}</div>
-                  <div className="job-title">{job.service?.name || "—"}</div>
-                  <div className="job-request-user">Requested by: <b>{job.user}</b></div>
-                  <div className="job-cost">₹ {job.estimated_cost || job.service?.price || "–"}</div>
-                  <div className="job-location">
-                    <FaMapMarkerAlt style={{ color: "#3F37C9", opacity: .96 }} />
-                    <a href={`https://maps.google.com/?q=${Number(job.lat)},${Number(job.lng)}`} target="_blank" rel="noopener noreferrer">
-                      {Number(job.lat).toFixed(3)}, {Number(job.lng).toFixed(3)}
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-      {/* Job Modal */}
-      {selectedJob && (
-        <div className="modal-overlay" onClick={() => setSelectedJob(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close-btn" aria-label="Close details" onClick={() => setSelectedJob(null)}>&times;</button>
-            <h3 style={{ color: "#3F37C9", fontWeight: 800, fontSize: "1.25em" }}>
-              {selectedJob.service?.name || "Service"}
-            </h3>
-            <div style={{ margin: "7px 0 18px 2px", color: "#ccc" }}>{selectedJob.service?.description}</div>
-            <div style={{ marginBottom: 11 }}>
-              <span style={{ fontWeight: 600, color: "#F5F5F5" }}>User:</span> {selectedJob.user}
-            </div>
-            <div>
-              <FaMapMarkerAlt style={{ marginRight: 5 }} />
-              <span><b>Location: </b>{Number(selectedJob.lat).toFixed(4)}, {Number(selectedJob.lng).toFixed(4)}</span>
-            </div>
-            <div style={{ marginTop: 8 }}>
-              <b>Notes:</b> {selectedJob.notes ? <span style={{ color: "#F5F5F5" }}>{selectedJob.notes}</span> : "—"}
-            </div>
-            <div style={{ marginTop: 8, marginBottom: 7, fontSize: "1.06em" }}>
-              <span style={{ color: statusStyles[selectedJob.status]?.color || "#FFD700" }}>
-                Status: {selectedJob.status}
-              </span>
-            </div>
-            <div>
-              <FaPhoneAlt style={{ marginRight: 6, color: "#19B87D" }} />
-              <span>Contact: <b>{selectedJob.user}</b></span>
-            </div>
-            <div className="provider-actions">
-              {selectedJob.status === "Pending" && (
-                <button
-                  className="accept-btn"
-                  style={{ background: "#2E86AB", color: "#fff", marginRight: 8, borderRadius: 6, fontWeight: 600, fontSize: "1rem", padding: "8px 22px" }}
-                  onClick={() => handleJobStatusChange(selectedJob.id, "Accepted")}
-                >
-                  Accept
+                  {acceptingJobId === job.id ? "Accepting..." : "Accept"}
                 </button>
-              )}
-              {(selectedJob.status === "Pending" || selectedJob.status === "Accepted") && (
-                <button
-                  className="cancel-btn"
-                  onClick={() => handleJobStatusChange(selectedJob.id, "Cancelled")}
-                >
-                  Cancel
-                </button>
-              )}
-              {selectedJob.status === "Accepted" && (
-                <div style={{ color: "#FFD700", marginTop: 12, fontWeight: 600 }}>
-                  Waiting for user to confirm provider arrival…
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {selectedJob && (
+          <div
+            className="modal-overlay"
+            onClick={() => setSelectedJob(null)}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div
+              className="modal-content"
+              onClick={(e) => e.stopPropagation()}
+              tabIndex={-1}
+              aria-label={`Details of job ${selectedJob.id}`}
+            >
+              <button className="modal-close-btn" onClick={() => setSelectedJob(null)} aria-label="Close details">&times;</button>
+              <h3>{selectedJob.service?.name || "—"}</h3>
+              <p>{selectedJob.service?.description || "No description available."}</p>
+              <p>
+                <b>User:</b> {selectedJob.user}
+              </p>
+              <p>
+                <FaMapMarkerAlt />{" "}
+                <a href={`https://maps.google.com/?q=${selectedJob.lat},${selectedJob.lng}`} target="_blank" rel="noopener noreferrer">
+                  {Number(selectedJob.lat).toFixed(4)}, {Number(selectedJob.lng).toFixed(4)}
+                </a>
+              </p>
+              <p>
+                <b>Notes:</b> {selectedJob.notes || "No notes available."}
+              </p>
+              <p>{statusBadge(selectedJob.status)}</p>
+              <p>
+                <b>Contact:</b> {selectedJob.user}{" "}
+                <a href={`tel:${selectedJob.userPhone || ""}`}>
+                  <FaPhoneAlt />
+                </a>
+              </p>
+              <div className="modal-actions">
+                {(selectedJob.status === "Pending" && !hasActiveJob) && (
+                  <button onClick={() => { handleJobAction(selectedJob.id, "Accepted"); setSelectedJob(null); }} className="accept-btn">
+                    Accept
+                  </button>
+                )}
+                <div style={{marginTop: "1em"}}>
+                  {renderProviderActions(selectedJob)}
                 </div>
-              )}
-              {selectedJob.status === "Arrived" && (
-                <div style={{ color: "#9A37C9", marginTop: 12, fontWeight: 600 }}>
-                  Provider arrival confirmed by user. Waiting for job completion confirmation…
-                </div>
-              )}
-              {selectedJob.status === "Completed" && (
-                <div style={{ color: "#19B87D", marginTop: 12, fontWeight: 600 }}>
-                  Service marked completed by user.
-                </div>
-              )}
-              {selectedJob.status === "Cancelled" && (
-                <div style={{ color: "#B90429", marginTop: 12, fontWeight: 600 }}>
-                  This request was cancelled.
-                </div>
-              )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
-      {/* Spinner keyframes */}
-      <style>{`
-        @keyframes spin { 100% { transform: rotate(360deg) } }
-      `}</style>
+        )}
+
+        <style>{`
+          @keyframes spin { 100% { transform: rotate(360deg); } }
+        `}</style>
+      </div>
     </div>
   );
 };
 
+
 function StatCard({ title, value, color }) {
   return (
     <div className="stat-card" style={{ borderLeft: `5px solid ${color}` }}>
-      <span style={{ fontSize: ".98em", fontWeight: 400, color: "#aaa", marginRight: 12 }}>{title}</span>
-      <span style={{ fontSize: "1.19em", color }}>{value}</span>
+      <span style={{ fontSize: "0.95em", color: "#777", marginRight: 10 }}>{title}</span>
+      <span style={{ fontSize: "1.3em", fontWeight: 600, color }}>{value}</span>
     </div>
   );
 }

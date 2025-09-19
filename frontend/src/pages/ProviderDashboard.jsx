@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import "../styles/pageBackground.css";
 import "../styles/global.css";
 import "../styles/providerdashboard.css";
-import { FaSyncAlt } from "react-icons/fa";
+import { FaSignInAlt, FaSyncAlt } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
 
 import ProviderStats from "../components/provider/ProviderStats";
 import AssignedJobs from "../components/provider/AssignedJobs";
 import AvailableJobs from "../components/provider/AvailableJobs";
-import PastJobs from "../components/provider/PastJobs";
 
 // Removed ProviderJobModal import as per new design
 
@@ -32,6 +32,8 @@ const ProviderDashboard = () => {
   const [actionInProgressId, setActionInProgressId] = useState(null);
   const [actionMessage, setActionMessage] = useState(null);
   const [actionError, setActionError] = useState(null);
+  const [sessionExpired, setSessionExpired] = useState(false);
+  const navigate = useNavigate();
 
   
   const hasActiveJob = assignedJobs.some((j) => ["Accepted", "Arrived"].includes(j.status));
@@ -71,60 +73,85 @@ const ProviderDashboard = () => {
     fetchProviderProfile();
   }, []);
 
-  // Fetch jobs initially and every 30 seconds
+  // Fetch jobs initially and every 15 seconds
   useEffect(() => {
+    if (sessionExpired) return; // skip fetching if session expired
     fetchJobs();
-    const timer = setInterval(fetchJobs, 30000);
+    const timer = setInterval(fetchJobs, 15000);
     return () => clearInterval(timer);
   }, []);
 
   async function fetchJobs() {
+  setError(null);
+  setRefreshing(true);
+  const fetchStartTime = Date.now();
+
+  try {
     setLoading(true);
-    setError(null);
-    try {
-      const token = localStorage.getItem("access");
-      if (!token) {
-        setError("Not logged in");
+    const token = localStorage.getItem("access");
+    if (!token) {
+      setError("Not logged in");
+      setSessionExpired(true);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+    const headers = { Authorization: `Bearer ${token}` };
+    const res = await fetch(`${backendUrl}/api/requests`, { headers });
+
+    if (res.status === 401) {
+      setSessionExpired(true);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+    if (!res.ok) throw new Error("Failed to load jobs");
+
+    const jobs = await res.json();
+    const providerEmail = (localStorage.getItem("providerEmail") || "").toLowerCase();
+    const providerType = (localStorage.getItem("providerType") || "").toLowerCase();
+
+    const assigned = jobs.filter(
+      (job) =>
+        job.provider?.email?.toLowerCase() === providerEmail &&
+        ["Accepted", "Arrived", "Completed", "Cancelled"].includes(job.status)
+    );
+    const available = jobs.filter(
+      (job) =>
+        job.provider &&
+        job.status === "Pending" &&
+        job.service?.name?.toLowerCase() === providerType
+    );
+    const past = assigned.filter((job) => ["Completed", "Cancelled"].includes(job.status));
+    const active = assigned.filter((job) => !["Completed", "Cancelled"].includes(job.status));
+
+    setAssignedJobs(active.sort((a, b) => b.id - a.id));
+    setPastJobs(past.sort((a, b) => b.id - a.id));
+    setAvailableJobs(available.sort((a, b) => b.id - a.id));
+
+  } catch (e) {
+    setError(e.message || "Failed to load jobs");
+  } finally {
+    const elapsed = Date.now() - fetchStartTime;
+    const minLoadingTime = 3000; // 3 seconds
+    const remaining = minLoadingTime - elapsed;
+
+    if (remaining > 0) {
+      setTimeout(() => {
         setLoading(false);
-        return;
-      }
-      const headers = { Authorization: `Bearer ${token}` };
-      const res = await fetch(`${backendUrl}/api/requests`, { headers });
-      if (res.status === 401) throw new Error("Session expired. Please log in again");
-      const jobs = await res.json();
-      const providerEmail = (localStorage.getItem("providerEmail") || "").toLowerCase();
-      const providerType = (localStorage.getItem("providerType") || "").toLowerCase();
-
-      const assigned = jobs.filter(
-        (job) =>
-          job.provider?.email?.toLowerCase() === providerEmail &&
-          ["Accepted", "Arrived", "Completed", "Cancelled"].includes(job.status)
-      );
-      const available = jobs.filter(
-        (job) =>
-          job.provider &&
-          job.status === "Pending" &&
-          job.service?.name?.toLowerCase() === providerType
-      );
-      const past = assigned.filter((job) => ["Completed", "Cancelled"].includes(job.status));
-      const active = assigned.filter((job) => !["Completed", "Cancelled"].includes(job.status));
-
-      setAssignedJobs(active.sort((a, b) => b.id - a.id));
-      setPastJobs(past.sort((a, b) => b.id - a.id));
-      setAvailableJobs(available.sort((a, b) => b.id - a.id));
-      console.log("Assigned jobs:", assignedJobs);
-console.log("Has active job:", hasActiveJob);
-console.log("Can accept:", canAccept);
-assignedJobs.forEach(job => console.log(`Job ${job.id} status: "${job.status}"`));
-    } catch (e) {
-      setError(e.message || "Failed to load jobs");
-    } finally {
+        setRefreshing(false);
+        setAcceptingJobId(null);
+        setActionInProgressId(null);
+      }, remaining);
+    } else {
       setLoading(false);
       setRefreshing(false);
       setAcceptingJobId(null);
       setActionInProgressId(null);
     }
   }
+}
+
 
   // Accept a job
   async function handleAcceptJob(jobId) {
@@ -213,13 +240,29 @@ assignedJobs.forEach(job => console.log(`Job ${job.id} status: "${job.status}"`)
     }
   }
 
-
-
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = "/login";
   };
 
+if (sessionExpired) {
+  return (
+    <div className="page-background">
+      <div className="myrequests-container">
+        <div className="banner banner-error">Session expired. Please login again.
+        <button
+          className="btn btn-save"
+          onClick={() => {handleLogout()}}
+        >
+          Go to Login
+        </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+else {
   return (
     <div className="page-background">
       {/* Global banners */}
@@ -237,14 +280,26 @@ assignedJobs.forEach(job => console.log(`Job ${job.id} status: "${job.status}"`)
 {/* Errors */}
         {error && <div className="banner banner-error">{error}</div>}
 
-        {/* Loading */}
-        {(loading || refreshing) && <div className="banner banner-info">Loading jobs...</div>}
+        {loading && (
+  <div className="status-msg loading" style={{ marginTop: 20 }}>
+    <span className="spinner" style={{ marginRight: 8 }}></span>
+    Refreshing current job...
+  </div>
+)}
+ {refreshing && (
+  <div className="banner banner-info" style={{ marginBottom: 15 }}>
+    <span className="spinner" style={{ marginRight: 8 }}></span>
+    Checking for available jobs...
+  </div>
+)}
+
         {/* Stats */}
         <ProviderStats assignedCount={assignedJobs.length} availableCount={availableJobs.length} />
  {/* Refresh */}
-        <button className="refresh-btn" onClick={fetchJobs} disabled={loading}>
-          <FaSyncAlt style={{ marginRight: 6 }} /> Refresh
-        </button>
+       <button className="refresh-btn" onClick={fetchJobs} disabled={loading || refreshing}>
+  <FaSyncAlt style={{ marginRight: 6 }} /> Refresh
+</button>
+
         {/* Job Sections */}
         <AssignedJobs
           jobs={assignedJobs}
@@ -254,26 +309,22 @@ assignedJobs.forEach(job => console.log(`Job ${job.id} status: "${job.status}"`)
           actionInProgressId={actionInProgressId}
           loading={loading}
         />
-
+        <br />
         <AvailableJobs
           jobs={availableJobs}
           onAccept={handleAcceptJob}
           canAccept={canAccept}
           acceptingJobId={acceptingJobId}
         />
-
-        <PastJobs
-          jobs={pastJobs}
-          onProviderAction={handleProviderChangeStatus}
-          hasActiveJob={hasActiveJob}
-        />
-
-        
+        <br />
+        <button onClick={() => navigate("/provider-past-jobs")} className="shortcut-btn">
+  View Past Jobs
+</button>
 
        
       </div>
     </div>
   );
 };
-
+}
 export default ProviderDashboard;

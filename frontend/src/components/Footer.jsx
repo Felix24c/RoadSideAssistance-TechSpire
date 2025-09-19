@@ -6,11 +6,10 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-container">
         <p className="footer-text">
-          © {new Date().getFullYear()} QuickAssist. All Rights Reserved.
+          © {new Date().getFullYear()} QuickAssist by Team TechSpire.
         </p>
         <ul className="footer-links">
-          <li><a href="/about">About</a></li>
-          <li><a href="/services">Services</a></li>
+          <li><a href="/about">About</a></li> | 
           <li><a href="/contact">Contact</a></li>
         </ul>
       </div>

@@ -43,26 +43,12 @@
   align-items: center;
   margin: 0;
   padding: 0;
+  font: var(--font-main);
+  font-weight: bold;
 }
 
-.nav-links li a {
-  text-decoration: none;
-  color: var(--color-light-grey);
-  font-family: var(--font-main);
-  font-size: 1rem;
-  font-weight: 500;
-  transition: color 0.23s, background 0.19s;
-  border-radius: 4px;
-  padding: 6px 11px;
-  outline: none;
-  display: inline-block;
-}
 
-.nav-links li a:hover, .nav-links li a:focus {
-  color: var(--color-blue);
-  background: rgba(63,55,201,0.09);
-}
-
+/* Keep existing .nav-home style for user Home button */
 .nav-home {
   background-color: var(--color-blue);
   color: white !important;
@@ -73,7 +59,8 @@
   box-shadow: 0 5px 18px #403fc911, 0 1.5px 5px #19193308;
 }
 
-.nav-home:hover, .nav-home:focus {
+.nav-home:hover,
+.nav-home:focus {
   background-color: #04006a;
   color: #fff !important;
 }
@@ -119,7 +106,7 @@
     align-items: flex-start;
     top: 57px;
     right: 0;
-    background: rgba(7,9,15,0.99);
+    background: rgba(7, 9, 15, 0.99);
     width: 72vw;
     max-width: 290px;
     height: 100vh;
@@ -129,7 +116,7 @@
     border-left: 2.5px solid var(--color-blue);
     border-top: none;
     border-radius: 13px 0 0 13px;
-    transition: transform 0.23s cubic-bezier(.61,-0.13,.24,1.14);
+    transition: transform 0.23s cubic-bezier(.61, -0.13, .24, 1.14);
     transform: translateX(100%);
   }
   .nav-links.open {
@@ -140,8 +127,88 @@
     display: flex;
   }
 }
+.nav-links li a {
+  font: var(--font-main);
+  background: rgba(63, 55, 201, 0.10);
+  color: var(--color-blue);
+  font-weight: bold;
+  padding: 7px 13px 7px 11px;
+  border-radius: 6px;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  border: none;
+  transition: background 0.14s, color 0.14s;
+}
+
+.nav-links li a:hover,
+.nav-links li a:focus {
+  background: var(--color-blue);
+  color: #fff;
+  outline: none;
+}
 
 /* Optional: reduce tap highlight and make toggle icon clear */
-.navbar-toggle:focus { outline: 2px solid var(--color-blue); }
-.navbar-toggle span { background-color: var(--color-light-grey); }
+.navbar-toggle:focus {
+  outline: 2px solid var(--color-blue);
+}
+.navbar-toggle span {
+  background-color: var(--color-light-grey);
+}
+/* Hide nav links on small screens by default */
+.nav-links {
+  display: flex;
+  list-style: none;
+}
 
+/* Hamburger button hidden on desktop */
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Hamburger icon bars */
+.hamburger,
+.hamburger::before,
+.hamburger::after {
+  content: "";
+  display: block;
+  width: 25px;
+  height: 3px;
+  background-color: #333;
+  margin: 5px 0;
+  transition: 0.3s;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .nav-toggle {
+    display: block;
+  }
+
+  .nav-logo{
+    font-size: 1.2rem;
+  }
+  .nav-links {
+    position: absolute;
+    top: 60px; /* adjust based on navbar height */
+    right: 0;
+    background-color: white;
+    flex-direction: column;
+    width: 200px;
+    border: 1px solid #ddd;
+    display: none;
+  }
+
+  .nav-links.nav-active {
+    display: flex;
+  }
+
+  .nav-links li {
+    margin: 10px 0;
+  }
+}

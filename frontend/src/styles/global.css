@@ -17,6 +17,7 @@ html{
 body {
   background-color: var(--color-black);
   color: var(--color-light-grey);
+  font: var(--font-main);
 }
 
 /* Headings */

@@ -192,9 +192,9 @@ const fetchStartTime = Date.now();
     return (
       <div className="page-background">
         <div className="myrequests-container">
-          <div className="status-msg error">Session expired. Please login again.</div>
-          <button className="btn btn-save" onClick={handleLogout} style={{ marginLeft: "10px", marginTop: "10px" }}>
-                <FaSignInAlt /> Go to Login
+          <div className="banner banner-error">Session expired. Please login again.</div>
+          <button className="btn-save" onClick={handleLogout} style={{ marginLeft: "10px", marginTop: "10px" }}>
+                <FaSignInAlt />  Go to Login
               </button>
         </div>
       </div>
@@ -240,7 +240,7 @@ const fetchStartTime = Date.now();
                   <span className="label">Provider: </span>{activeRequest.provider?.name || <em>Awaiting Assignment</em>}
                   {activeRequest.provider?.phone && (
                     <a className="phone-link" href={`tel:${activeRequest.provider.phone}`} title={`Call ${activeRequest.provider.phone}`}>
-                      <FaPhoneAlt />
+                      <FaPhoneAlt /> Place a Call
                     </a>
                   )}
                 </div>
@@ -281,15 +281,15 @@ const fetchStartTime = Date.now();
                     <input type="number" className="edit-coord" placeholder="Longitude"
                            value={editLocation.lng}
                            onChange={e => setEditLocation({ ...editLocation, lng: e.target.value })} />
-                    <button className="btn btn-save" onClick={() => saveEdit(activeRequest.id)}>Save</button>
-                    <button className="btn btn-cancel" onClick={cancelEditing}>Cancel</button>
+                    <button className="btn btn-save" onClick={() => saveEdit(activeRequest.id)}>Save Details</button>
+                    <button className="btn btn-cancel" onClick={cancelEditing}>Dont Save</button>
                   </>
                 ) : (
                   <>
                     {(activeRequest.status === "Pending" || activeRequest.status === "Accepted" || activeRequest.status === "Arrived") && (
                       <>
-                        <button className="btn btn-edit" onClick={() => startEditing(activeRequest)}><FaEdit /> Edit</button>
-                        <button className="btn btn-cancel" onClick={() => cancelRequest(activeRequest.id)}><FaTimes /> Cancel</button>
+                        <button className="btn btn-edit" onClick={() => startEditing(activeRequest)}><FaEdit /> Edit Details</button>
+                        <button className="btn btn-cancel" onClick={() => cancelRequest(activeRequest.id)}><FaTimes /> Cancel Request</button>
                       </>
                     )}
                   </>

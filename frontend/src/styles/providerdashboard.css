@@ -168,18 +168,24 @@
   background-color: #147d56;
   transform: scale(1.03);
 }
-
-/* Banner messages (reuse from ServiceRequest) */
+/* Banner styles for feedback */
 .banner {
   display: block;
   border-radius: 6px;
-  margin: 0.8rem auto;
-  padding: 0.7rem 1rem;
+  margin: 0.5rem auto 1.2rem auto;
+  padding: 0.65rem 1rem;
   text-align: center;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-  font-size: 1rem;
-  max-width: 600px;
+  box-shadow: 0 2px 8px #22214318;
+  font-size: 1.00rem;
+  max-width: 450px;
+  letter-spacing: .01em;
+  transition: all 0.25s;
+  animation: fadeInScale 0.7s cubic-bezier(.4,2,.5,.95);
+}
+.banner-info {
+  background-color: var(--color-blue);
+  color: #fff;
 }
 .banner-success {
   background: #1ce299;
@@ -190,11 +196,16 @@
   color: var(--color-light-grey);
   border: 1.5px solid var(--color-red);
 }
-.banner-info {
-  background-color: var(--color-blue);
-  color: #fff;
+@keyframes fadeInScale {
+  from {
+    transform: scale(.94);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
-
 /* Modal */
 .modal-overlay {
   position: fixed;
@@ -302,4 +313,18 @@
   .job-card { min-width: 95vw; }
   .provider-stats-row { gap: 12px; }
   .stat-card { min-width: 45%; }
+}
+/* Buttons full width on small screens */
+@media (max-width: 600px) {
+  .request-actions button,
+  .btn,
+  .primary-btn {
+    width: 100% !important;
+    margin-bottom: 10px;
+  }
+  .request-top,
+  .request-details {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

@@ -105,8 +105,11 @@ def provider_view(request, provider_id):
 def requests_view(request):
     if request.method == 'GET':
         requests = ServiceRequest.objects.all()
-        data = [
-            {
+        data = []
+        for r in requests:
+            user_profile = UserProfile.objects.filter(user=r.user).first()
+            user_phone = user_profile.phone if user_profile else None
+            data.append({
                 "id": r.id,
                 "service": {
                     "id": r.service.id,
@@ -115,6 +118,7 @@ def requests_view(request):
                     "price": r.service.price
                 },
                 "user": r.user.username if r.user else None,
+                "user_phone": user_phone,
                 "provider": {
                     "id": r.provider.id,
                     "name": r.provider.name,
@@ -128,8 +132,7 @@ def requests_view(request):
                 "lat": r.lat,
                 "lng": r.lng,
                 "estimated_cost": r.estimated_cost
-            } for r in requests
-        ]
+            })
         return Response(data)
 
     elif request.method == 'POST':

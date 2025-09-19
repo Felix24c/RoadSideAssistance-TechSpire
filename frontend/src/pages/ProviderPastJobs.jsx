@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "../styles/home.css";
 import "../styles/myrequests.css";
+import "../styles/providerpastjobs.css";
 import "../styles/pageBackground.css";
-import { FaPhoneAlt, FaMapMarkerAlt } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { FaMapMarkerAlt } from "react-icons/fa";
 
 const STATUS_COLORS = {
   Pending: "badge-pending",
@@ -23,53 +23,54 @@ function formatDate(iso) {
 
 const backendURL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
 
-const MyRequests = () => {
+const ProviderPastJobs = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sessionExpired, setSessionExpired] = useState(false);
-  const navigate = useNavigate();
 
-  // Polling - auto refresh every 15s
   useEffect(() => {
     let timer;
     fetchRequests();
     timer = setInterval(fetchRequests, 15000);
     return () => clearInterval(timer);
-    // eslint-disable-next-line
   }, []);
 
   const fetchRequests = async () => {
     try {
       setLoading(true);
       setError(null);
-      setSessionExpired(false);
       const token = localStorage.getItem("access");
       if (!token) throw new Error("Not logged in");
 
-      const res = await fetch(`${backendURL}/api/myrequests`, {
+      const res = await fetch(`${backendURL}/api/requests`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         }
       });
-      if (res.status === 401) {
-        setSessionExpired(true);
-        throw new Error("Session expired. Please log in again.");
-      }
+      if (res.status === 401) throw new Error("Session expired. Please log in again.");
       const data = await res.json();
 
-      // Filter only Completed and Cancelled requests
-      const filtered = (data || []).filter(req => req.status === "Completed" || req.status === "Cancelled");
+      const providerEmail = (localStorage.getItem("providerEmail") || "").toLowerCase();
+
+      // Filter requests assigned to this provider and with status Completed or Cancelled
+      const filtered = data.filter(
+        (req) =>
+          req.provider?.email?.toLowerCase() === providerEmail &&
+          ["Completed", "Cancelled"].includes(req.status)
+      );
+
+      // Sort by created date descending (latest first)
+      filtered.sort((a, b) => new Date(b.created) - new Date(a.created));
+
       setRequests(filtered);
     } catch (err) {
-      setError(err.message || "Failed to load requests.");
+      setError(err.message || "Failed to load past jobs.");
     } finally {
       setLoading(false);
     }
   };
-
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = "/login";
@@ -79,23 +80,18 @@ const MyRequests = () => {
     <div className="page-background">
       <div className="myrequests-container">
         <div className="myrequests-header">
-          <h1>My Past Requests</h1>
+          <h1>My Past Jobs</h1>
         </div>
-
         {loading ? (
-          <div className="status-msg loading">Loading your requests...</div>
-        ) : sessionExpired ? (
-          <div className="banner banner-error">
-            Session expired. Please log in again.
-            <br />
-            <button className="btn-save" onClick={handleLogout}>
-            Go to Login
-          </button>
-          </div>
+          <div className="status-msg loading">Loading your past jobs...</div>
         ) : error ? (
-          <div className="status-msg error">{error}</div>
+          <div className="banner banner-error">{error}
+            <button className="btn-save" onClick={handleLogout}>
+              Go to Login
+            </button>
+          </div>
         ) : requests.length === 0 ? (
-          <div className="status-msg empty">No past requests found.</div>
+          <div className="status-msg empty">No past jobs found.</div>
         ) : (
           <div className="requests-grid">
             {requests.map((req) => (
@@ -107,23 +103,11 @@ const MyRequests = () => {
                 </div>
                 <div className="request-details">
                   <div>
-                    <span className="label">Provider: </span>
-                    {req.provider
-                      ? <>
-                          {typeof req.provider === "object" && req.provider.name ? req.provider.name : req.provider}
-                          {req.provider.phone && (
-                            <span className="provider-phone-details">
-                              <a href={`tel:${req.provider.phone}`} className="phone-link" title={`Call ${req.provider.phone}`}>
-                                <FaPhoneAlt style={{fontSize:"1em", marginRight: "4px", verticalAlign: "middle"}} />
-                              </a>
-                              <span style={{fontFamily: "monospace", fontSize: "1em"}}>{req.provider.phone}</span>
-                            </span>
-                          )}
-                        </>
-                      : <span className="unassigned">Awaiting assignment</span>}
+                    <span className="label">User:  </span>
+                    {req.user || "Unknown"}
                   </div>
                   <div>
-                    <span className="label">Your Location: </span>
+                    <span className="label">User 's Location: </span>
                     <a
                       className="map-link"
                       href={`https://maps.google.com/?q=${req.lat},${req.lng}`}
@@ -134,7 +118,7 @@ const MyRequests = () => {
                     </a>
                   </div>
                   <div>
-                    <span className="label">Estimated Cost: </span>
+                    <span className="label">Cost: </span>
                     <span className="cost">₹{req.estimated_cost}</span>
                   </div>
                   <div>
@@ -142,7 +126,6 @@ const MyRequests = () => {
                     <span>{req.notes || <span className="muted">None</span>}</span>
                   </div>
                 </div>
-                {/* No edit or cancel buttons */}
               </div>
             ))}
           </div>
@@ -152,4 +135,4 @@ const MyRequests = () => {
   );
 };
 
-export default MyRequests;
+export default ProviderPastJobs;

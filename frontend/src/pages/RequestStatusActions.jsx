@@ -1,4 +1,5 @@
 import React from "react";
+import "../styles/home.css";
 const backendURL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
 
 const RequestStatusActions = ({ request, userRole, onStatusChange }) => {

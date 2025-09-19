@@ -200,12 +200,71 @@ h2{
   display: inline-block;
   vertical-align: middle;
 }
+.primary-btn, .btn-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.2s;
+  margin-top: 10px;
+  font: var(--font-main);
+  font-weight: bolder;
+}
 
+/* Reuse existing palette */
+.primary-btn{
+  background: var(--color-blue);
+  color: var(--color-light-grey);
+}
+.primary-btn:hover{
+  transform: scale(1.03);
+  background-color: #2a25a3;
+}
 @keyframes spin {
   0% { transform: rotate(0deg);}
   100% { transform: rotate(360deg);}
 }
-
+.banner {
+  display: block;
+  border-radius: 6px;
+  margin: 0.5rem auto 1.2rem auto;
+  padding: 0.65rem 1rem;
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 2px 8px #22214318;
+  font-size: 1.00rem;
+  max-width: 450px;
+  letter-spacing: .01em;
+  transition: all 0.25s;
+  animation: fadeInScale 0.7s cubic-bezier(.4,2,.5,.95);
+}
+.banner-info {
+  background-color: var(--color-blue);
+  color: #fff;
+}
+.btn-save {
+  background: #1ce299;
+  color: var(--color-black);
+}
+.banner-error {
+  background: #ff4949;
+  color: var(--color-light-grey);
+  border: 1.5px solid var(--color-red);
+}
+@keyframes fadeInScale {
+  from {
+    transform: scale(.94);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
 /* Responsive: features stack vertically on mobile/tablet */
 @media (max-width: 900px) {
   .home-features {

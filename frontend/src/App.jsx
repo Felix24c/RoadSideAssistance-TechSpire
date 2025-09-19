@@ -10,7 +10,8 @@ import ServiceRequest from "./pages/ServiceRequest";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import MyRequests from "./pages/MyRequests";
-import ProviderDashboard from "./pages/ProviderDashboard"; // <-- Add this import
+import ProviderDashboard from "./pages/ProviderDashboard";
+import ProviderPastJobs from "./pages/ProviderPastJobs";
 import './styles/global.css';
 
 // ✅ Protected route wrapper for users (must be logged in)
@@ -26,7 +27,11 @@ const PrivateProviderRoute = ({ children }) => {
   const role = localStorage.getItem("role");
   return (isLoggedIn && role === "provider") ? children : <Navigate to="/login" replace />;
 };
-
+const PrivateAnyUserRoute = ({ children }) => {
+  const isLoggedIn = !!localStorage.getItem("userId");
+  const role = localStorage.getItem("role");
+  return (isLoggedIn && (role === "user" || role === "provider")) ? children : <Navigate to="/login" replace />;
+};
 // Layout wrapper to hide/show Navbar/Footer on certain routes
 function Layout({ children }) {
   const location = useLocation();
@@ -48,6 +53,24 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          
+
+          <Route
+  path="/about"
+  element={
+    <PrivateAnyUserRoute>
+      <About />
+    </PrivateAnyUserRoute>
+  }
+/>
+<Route
+path="/contact"
+  element={
+    <PrivateAnyUserRoute>
+      <Contact />
+    </PrivateAnyUserRoute>
+  }
+/>
 
           {/* Provider Dashboard (ROLE protected!) */}
           <Route
@@ -58,7 +81,14 @@ function App() {
               </PrivateProviderRoute>
             }
           />
-
+          <Route
+  path="/provider-past-jobs"
+  element={
+    <PrivateProviderRoute>
+      <ProviderPastJobs />
+    </PrivateProviderRoute>
+  }
+/>
           {/* User/General Protected routes */}
           <Route
   path="/"
@@ -68,22 +98,7 @@ function App() {
     </PrivateUserRoute>
   }
 />
-<Route
-  path="/about"
-  element={
-    <PrivateUserRoute>
-      <About />
-    </PrivateUserRoute>
-  }
-/>
-<Route
-  path="/contact"
-  element={
-    <PrivateUserRoute>
-      <Contact />
-    </PrivateUserRoute>
-  }
-/>
+
 <Route
   path="/select-service"
   element={

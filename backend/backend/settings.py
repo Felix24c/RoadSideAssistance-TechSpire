@@ -83,10 +83,10 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://192.168.1.55:3000",
-    "https://RoadsideAssistancedomain.com", #final domain after deploying
 ]
-
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    CORS_ALLOWED_ORIGINS.append(frontend_url)
 
 ROOT_URLCONF = 'backend.urls'
 

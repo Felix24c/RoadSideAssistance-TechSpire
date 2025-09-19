@@ -416,3 +416,18 @@ def confirm_completed(request, id):
         req.status = "Completed"
     req.save()
     return Response(ServiceRequestSerializer(req).data, status=200)
+
+
+@api_view(['GET'])
+def home(request):
+    return Response({
+        "message": "Welcome to QuickAssist API",
+        "available_endpoints": [
+            "/api/health",
+            "/api/users",
+            "/api/providers",
+            "/api/requests",
+            "/api/services",
+            "/api/swagger/"
+        ]
+    })

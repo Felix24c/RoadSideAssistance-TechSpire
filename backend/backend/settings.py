@@ -46,7 +46,7 @@ if not SECRET_KEY:
     raise RuntimeError('DJANGO_SECRET_KEY environment variable not set. Please add it to a .env file or your environment.')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')  # comma-separated list
 

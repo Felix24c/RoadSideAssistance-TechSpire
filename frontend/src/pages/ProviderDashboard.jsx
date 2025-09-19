@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import backendURL from "./config";
 import "../styles/pageBackground.css";
 import "../styles/global.css";
 import "../styles/providerdashboard.css";
@@ -19,7 +20,6 @@ const STATUS_STYLES = {
   Cancelled: { color: "var(--color-red)", bg: "rgba(217,4,41,0.13)" },
 };
 
-const backendUrl = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
 
 const ProviderDashboard = () => {
   const [assignedJobs, setAssignedJobs] = useState([]);

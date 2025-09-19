@@ -1,4 +1,5 @@
 import React from "react";
+import backendURL from "./config";
 
 const ProviderStatusActions = ({ job, onProviderAction, hasActiveJob }) => {
   if (["Cancelled", "Completed"].includes(job.status)) return null;

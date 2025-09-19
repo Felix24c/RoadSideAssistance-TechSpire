@@ -2,6 +2,7 @@ import React from 'react';
 import '../styles/contact.css';
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
 import '../styles/pageBackground.css';
+import backendURL from "./config";
 
 const Contact = () => {
 

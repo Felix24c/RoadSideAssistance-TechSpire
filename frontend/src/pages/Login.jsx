@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import backendURL from "./config";
 import { useNavigate } from "react-router-dom";
 import "../styles/login.css";
 import "../styles/pageBackground.css";
@@ -28,7 +29,6 @@ const Login = () => {
     setLoading(true);
     setSuccess(false);
 
-    const backendURL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
     try {
       const res = await fetch(`${backendURL}/api/users/login`, {
         method: "POST",

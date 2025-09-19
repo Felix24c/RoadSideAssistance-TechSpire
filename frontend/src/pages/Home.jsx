@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import backendURL from "./config";
 import "../styles/home.css";
 import "../styles/myrequests.css"; // use MyRequests style for cards
 import "../styles/pageBackground.css";
@@ -40,7 +41,6 @@ function formatDate(iso) {
   });
 }
 
-const backendURL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
 
 const Home = () => {
   const [backendStatus, setBackendStatus] = useState("Checking...");

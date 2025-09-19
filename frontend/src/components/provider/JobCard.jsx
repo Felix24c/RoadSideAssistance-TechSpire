@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaPhoneAlt, FaMapMarkerAlt, FaTimes, FaEdit } from "react-icons/fa";
+import backendURL from "./config";
 
 const STATUS_COLORS = {
   Pending: "badge-pending",

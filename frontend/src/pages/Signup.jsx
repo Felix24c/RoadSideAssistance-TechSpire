@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import backendURL from "./config";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "../styles/signup.css";
 import "../styles/pageBackground.css";
@@ -53,7 +54,6 @@ const Signup = () => {
       return;
     }
     setLoading(true);
-    const backendURL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
     try {
       const res = await fetch(`${backendURL}/api/users/signup`, {
         method: "POST",

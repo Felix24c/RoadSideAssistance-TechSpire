@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import backendURL from "./config";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/servicerequest.css";
 import "../styles/pageBackground.css";
@@ -35,7 +36,6 @@ const ServiceRequest = () => {
 
   // Fetch service details
   useEffect(() => {
-    const backendURL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
     fetch(`${backendURL}/api/services`)
       .then((res) => res.json())
       .then((data) => {
@@ -50,7 +50,6 @@ const ServiceRequest = () => {
 
   // Fetch providers list and filter eligible
   useEffect(() => {
-    const backendURL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
     fetch(`${backendURL}/api/providers`)
       .then((res) => res.json())
       .then((data) => {
@@ -113,7 +112,6 @@ const ServiceRequest = () => {
     setSuccess(null);
 
     if (!userId) return setServiceError("You must be logged in to submit a request.");
-    const backendURL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
     const coords = parseLatLng(formData.location);
 
     if (!coords) {

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import backendURL from "./config";
 import "../styles/home.css";
 import "../styles/myrequests.css";
 import "../styles/pageBackground.css";
@@ -21,7 +22,6 @@ function formatDate(iso) {
   });
 }
 
-const backendURL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
 
 const MyRequests = () => {
   const [requests, setRequests] = useState([]);

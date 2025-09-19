@@ -1,5 +1,6 @@
 import React from "react";
 import JobCard from "./JobCard";
+import backendURL from "./config";
 
 const PastJobs = ({ jobs, onProviderAction, hasActiveJob }) => (
   <section>

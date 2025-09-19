@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import backendURL from "./config";
 import { useNavigate } from "react-router-dom";
 import "../styles/selectservice.css";
 import "../styles/pageBackground.css";
@@ -10,9 +11,6 @@ const SelectService = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const backendURL =
-      process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
-
     // Simulate a 4-second delay for spinner
     const timer = setTimeout(() => {
       fetch(`${backendURL}/api/services`)

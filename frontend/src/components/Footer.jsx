@@ -1,5 +1,6 @@
 import React from 'react';
 import '../styles/footer.css';
+import backendURL from "./config";
 
 const Footer = () => {
   return (

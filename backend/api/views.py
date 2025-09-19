@@ -19,6 +19,52 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .serializers import ServiceRequestSerializer, ServiceRequestUserSerializer, ServiceRequestEditSerializer
 
 from rest_framework_simplejwt.tokens import RefreshToken
+# -------------------------------
+# Swagger Access (Secure)
+# -------------------------------
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework import permissions
+
+# Secret key for Swagger access
+SWAGGER_SECRET = "feliciocosta"
+
+class SwaggerAccessPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        # Only allow access if ?secret=<key> is provided
+        return request.GET.get("secret") == SWAGGER_SECRET
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="QuickAssist API",
+        default_version='v1',
+        description="Swagger UI for testing API endpoints (Protected)",
+    ),
+    public=True,
+    permission_classes=(SwaggerAccessPermission,),
+)
+
+# -------------------------------
+# Root / Home Endpoint
+# -------------------------------
+@api_view(['GET'])
+def home(request):
+    """
+    Friendly home endpoint for assignment evaluation.
+    Lists available endpoints without exposing sensitive info.
+    """
+    return Response({
+        "message": "Welcome to QuickAssist API",
+        "note": "Swagger access requires secret key: ?secret=YOUR_SECRET",
+        "available_endpoints": [
+            "/api/health",
+            "/api/users",
+            "/api/providers",
+            "/api/requests",
+            "/api/services",
+            "/api/swagger/?secret=<key>"
+        ]
+    })
 
 
 # -------------------------------
@@ -416,18 +462,3 @@ def confirm_completed(request, id):
         req.status = "Completed"
     req.save()
     return Response(ServiceRequestSerializer(req).data, status=200)
-
-
-@api_view(['GET'])
-def home(request):
-    return Response({
-        "message": "Welcome to QuickAssist API",
-        "available_endpoints": [
-            "/api/health",
-            "/api/users",
-            "/api/providers",
-            "/api/requests",
-            "/api/services",
-            "/api/swagger/"
-        ]
-    })

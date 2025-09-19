@@ -66,7 +66,7 @@ const MIN_LOADING_TIME = 3000;
     fetch(`${backendURL}/api/health`)
       .then((res) => res.json())
       .then((data) => setBackendStatus(data.status === "OK" ? "✅ Online" : String(data.status)))
-      .catch(() => setBackendStatus("❌ Backend not reachable"));
+      .catch(() => setBackendStatus("❌ Server Backend not reachable"));
   }, []);
 
   useEffect(() => {

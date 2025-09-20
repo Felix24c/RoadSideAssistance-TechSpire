@@ -2,7 +2,7 @@ import React from 'react';
 import '../styles/about.css';
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
 import '../styles/pageBackground.css';
-import backendURL from "./config";
+import backendURL from "../config";
 
 // FAQs data
 const faqs = [

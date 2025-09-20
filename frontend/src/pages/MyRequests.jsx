@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import backendURL from "./config";
+import backendURL from "../config";
 import "../styles/home.css";
 import "../styles/myrequests.css";
 import "../styles/pageBackground.css";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import backendURL from "./config";
+import backendURL from "../config";
 import "../styles/home.css";
 import "../styles/myrequests.css"; // use MyRequests style for cards
 import "../styles/pageBackground.css";

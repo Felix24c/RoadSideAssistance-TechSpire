@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import backendURL from "./config";
+import backendURL from "../config";
 import { useNavigate } from "react-router-dom";
 import "../styles/selectservice.css";
 import "../styles/pageBackground.css";

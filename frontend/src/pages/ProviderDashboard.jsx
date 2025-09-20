@@ -1,25 +1,14 @@
 import React, { useEffect, useState } from "react";
-import backendURL from "./config";
+import backendURL from "../config";
 import "../styles/pageBackground.css";
 import "../styles/global.css";
 import "../styles/providerdashboard.css";
-import { FaSignInAlt, FaSyncAlt } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { FaSyncAlt } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 import ProviderStats from "../components/provider/ProviderStats";
 import AssignedJobs from "../components/provider/AssignedJobs";
 import AvailableJobs from "../components/provider/AvailableJobs";
-
-// Removed ProviderJobModal import as per new design
-
-const STATUS_STYLES = {
-  Pending: { color: "#FFD700", bg: "rgba(255,215,0,0.16)" },
-  Accepted: { color: "var(--color-blue)", bg: "rgba(63,55,201,0.15)" },
-  Arrived: { color: "#9C37C9", bg: "rgba(154,55,201,0.15)" },
-  Completed: { color: "#19B87D", bg: "rgba(25,184,125,0.15)" },
-  Cancelled: { color: "var(--color-red)", bg: "rgba(217,4,41,0.13)" },
-};
-
 
 const ProviderDashboard = () => {
   const [assignedJobs, setAssignedJobs] = useState([]);
@@ -50,7 +39,7 @@ const ProviderDashboard = () => {
         const token = localStorage.getItem("access");
         if (!token) throw new Error("Not logged in");
         const email = localStorage.getItem("email");
-        const res = await fetch(`${backendUrl}/api/providers`, {
+        const res = await fetch(`${backendURL}/api/providers`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Failed to fetch providers");
@@ -97,7 +86,7 @@ const ProviderDashboard = () => {
       return;
     }
     const headers = { Authorization: `Bearer ${token}` };
-    const res = await fetch(`${backendUrl}/api/requests`, { headers });
+    const res = await fetch(`${backendURL}/api/requests`, { headers });
 
     if (res.status === 401) {
       setSessionExpired(true);
@@ -174,7 +163,7 @@ const ProviderDashboard = () => {
       ]);
 
       const payload = { status: "Accepted", provider: providerEmail };
-      const res = await fetch(`${backendUrl}/api/requests/${jobId}`, {
+      const res = await fetch(`${backendURL}/api/requests/${jobId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
@@ -219,7 +208,7 @@ const ProviderDashboard = () => {
       if (!token) throw new Error("Not logged in");
 
       const endpoint = action === "arrived" ? "/confirm-arrived" : "/confirm-completed";
-      const res = await fetch(`${backendUrl}/api/requests/${jobId}${endpoint}`, {
+      const res = await fetch(`${backendURL}/api/requests/${jobId}${endpoint}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ role: "provider" }),

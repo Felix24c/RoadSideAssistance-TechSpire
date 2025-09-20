@@ -1,5 +1,5 @@
 import React from "react";
-import backendURL from "./config";
+import backendURL from "../../config";
 
 const ProviderStats = ({ assignedCount, availableCount }) => (
   <div className="provider-stats-row">

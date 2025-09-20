@@ -1,6 +1,6 @@
 import React from "react";
 import "../styles/home.css";
-import backendURL from "./config";
+import backendURL from "../config";
 
 const RequestStatusActions = ({ request, userRole, onStatusChange }) => {
   if (!request) return null;

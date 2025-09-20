@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import backendURL from "./config";
+import backendURL from "../config";
 import { useNavigate } from "react-router-dom";
 import "../styles/login.css";
 import "../styles/pageBackground.css";

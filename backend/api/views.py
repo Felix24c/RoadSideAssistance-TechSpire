@@ -26,22 +26,14 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
 
-# Secret key for Swagger access
-SWAGGER_SECRET = "feliciocosta"
-
-class SwaggerAccessPermission(permissions.BasePermission):
-    def has_permission(self, request, view):
-        # Only allow access if ?secret=<key> is provided
-        return request.GET.get("secret") == SWAGGER_SECRET
-
 schema_view = get_schema_view(
     openapi.Info(
         title="QuickAssist API",
         default_version='v1',
-        description="Swagger UI for testing API endpoints (Protected)",
+        description="Swagger UI for testing API endpoints",
     ),
     public=True,
-    permission_classes=(SwaggerAccessPermission,),
+    permission_classes=(permissions.AllowAny,),
 )
 
 # -------------------------------
@@ -55,14 +47,14 @@ def home(request):
     """
     return Response({
         "message": "Welcome to QuickAssist API",
-        "note": "Swagger access requires secret key: ?secret=YOUR_SECRET",
+        "note": "Visit /api/swagger/ for interactive API docs",
         "available_endpoints": [
             "/api/health",
             "/api/users",
             "/api/providers",
             "/api/requests",
             "/api/services",
-            "/api/swagger/?secret=<key>"
+            "/api/swagger/"
         ]
     })
 

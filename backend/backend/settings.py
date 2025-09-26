@@ -50,7 +50,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')  # comma-separated list
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -83,10 +82,15 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://quickassist-frontend.onrender.com",
 ]
+CORS_ALLOW_CREDENTIALS = True
+
+
 frontend_url = os.getenv("FRONTEND_URL")
 if frontend_url:
-    CORS_ALLOWED_ORIGINS.append(frontend_url)
+    CORS_ALLOWED_ORIGINS.append(frontend_url.rstrip("/"))
+
 
 ROOT_URLCONF = 'backend.urls'
 
